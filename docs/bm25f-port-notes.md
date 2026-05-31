@@ -32,7 +32,7 @@ score(t,d) = IDF(t) · tf~ / (k1 + tf~)
 ## Port milestones (in order)
 
 1. **Scoring core** ✅ *(this scaffold)* — pure, testable `idf` / `pseudo_tf` / `score_term` / `score`; no I/O, no coroutines. Unit-tested.
-2. **Tokenization** — port the `nlp` crate (stemmer + stop-words) or wrap an existing C++ tokenizer. Pure/sync; unit-tested against OramaCore token outputs.
+2. **Tokenization** ✅ *(custom, minimal)* — [`tokenize.hpp`](../include/oramacore/tokenize.hpp)/[`tokenize.cpp`](../src/tokenize.cpp): normalize → split → English stop-words → minimal suffix stemmer. **Custom + dependency-free** (decided: no libstemmer / no Rust `nlp` dep — keep it a clean L1 leaf). English-only for now; the `Locale` knob is in the interface for later languages. The stemmer is a tiny Porter subset (not full Snowball) — good enough to unblock posting lists + demo in the experiment UI; swap in Snowball later if score-parity (#101) needs it. Pure/sync; unit-tested ([`test_tokenize.cpp`](../tests/test_tokenize.cpp)). Pieces (`normalize`/`is_stop_word`/`stem`) are exposed so the experiment UI can show each step.
 3. **Posting lists + per-field stats** — term → postings (`doc_id`, per-field tf, per-field len); maintain `avglen_f`, `df_t`, `N`. Start in-memory (the **uncommitted** index).
 4. **Two-index pattern** — uncommitted (write-optimized, in-memory) → **committed** (read-optimized, mmap-backed) with an **atomic pointer swap**; readers never see a half-built index. (This is one of Tommaso's two "never change" pillars.)
 5. **Async search (Boost.Capy, D23)** — `search()` returns a Capy `task<T>`; scatter/gather across postings is `co_await`-shaped; streamed results are `std::generator` / Capy streams. Multi-term queries accumulate per-term scores in the right order.
