@@ -75,7 +75,7 @@ std::string stem(std::string_view word, Locale locale) {
     else if (strip("ed", 3)) {}
     else if (strip("ly", 3)) {}
     else if (strip("es", 3)) {}
-    else if (strip("s", 2) && !ends_with("s")) {}  // plural -s, not -ss
+    else if (!ends_with("ss") && strip("s", 2)) {}  // plural -s, but never -ss ("less" stays "less")
     return w;
 }
 
