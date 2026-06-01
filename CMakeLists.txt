@@ -28,6 +28,14 @@ add_library(oramacore-cpp STATIC
 add_library(orama::oramacore-cpp ALIAS oramacore-cpp)
 target_include_directories(oramacore-cpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# Profiling/benchmark harness (off by default). Build RelWithDebInfo for real numbers:
+#   cmake -S . -B build-bench -G Ninja -DORAMACORE_CPP_BENCH=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo
+option(ORAMACORE_CPP_BENCH "Build the CSV profiling benchmark" OFF)
+if(ORAMACORE_CPP_BENCH)
+  add_executable(oramacore-cpp-bench bench/bench_csv.cpp)
+  target_link_libraries(oramacore-cpp-bench PRIVATE oramacore-cpp)
+endif()
+
 include(CTest)
 if(BUILD_TESTING)
   include(FetchContent)
