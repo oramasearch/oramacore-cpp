@@ -57,6 +57,15 @@ struct FieldHit {
     const std::unordered_map<std::uint32_t, FieldParams>& params,
     const std::unordered_map<std::uint32_t, FieldStats>& stats);
 
+// Flat-vector variant of pseudo_tf: `params`/`stats` are indexed DIRECTLY by
+// field_id (no hashing) — the hot-path form used by the index's search loop.
+// Identical math to the map overload; out-of-range field_ids fall back to
+// defaults. Caller guarantees field_ids are dense + in range for best speed.
+[[nodiscard]] double pseudo_tf(
+    const std::vector<FieldHit>& hits,
+    const std::vector<FieldParams>& params,
+    const std::vector<FieldStats>& stats);
+
 // score(t,d) = IDF · tf~ / (k1 + tf~).
 [[nodiscard]] double score_term(
     double idf_value,

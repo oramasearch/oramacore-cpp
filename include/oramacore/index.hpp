@@ -88,6 +88,13 @@ private:
     std::unordered_map<std::uint32_t, std::uint64_t> field_doc_count_;
 
     std::uint64_t doc_count_ = 0;
+
+    // Flat per-field scoring caches (indexed by field_id), rebuilt on add().
+    // They let search() stay allocation-free AND fully read-only — so it's safe
+    // to call concurrently (e.g. from the decode-loop coroutines).
+    std::vector<bm25f::FieldParams> params_cache_;
+    std::vector<bm25f::FieldStats> stats_cache_;
+    void rebuild_field_caches();
 };
 
 }  // namespace oramacore::index

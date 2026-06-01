@@ -33,6 +33,24 @@ double pseudo_tf(
     return acc;
 }
 
+double pseudo_tf(
+    const std::vector<FieldHit>& hits,
+    const std::vector<FieldParams>& params,
+    const std::vector<FieldStats>& stats) {
+    double acc = 0.0;
+    for (const auto& h : hits) {
+        const FieldParams fp = (h.field_id < params.size()) ? params[h.field_id] : FieldParams{};
+        const double avg_len = (h.field_id < stats.size()) ? stats[h.field_id].avg_len : 0.0;
+        const double len_ratio = (avg_len > 0.0)
+            ? (static_cast<double>(h.field_len) / avg_len)
+            : 1.0;
+        const double denom = 1.0 - fp.b + fp.b * len_ratio;
+        if (denom <= 0.0) continue;
+        acc += fp.weight * (static_cast<double>(h.term_freq) / denom);
+    }
+    return acc;
+}
+
 double score_term(double idf_value, double pseudo_tf_value, const Params& params) {
     if (pseudo_tf_value <= 0.0) return 0.0;
     return idf_value * (pseudo_tf_value / (params.k1 + pseudo_tf_value));

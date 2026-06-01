@@ -52,31 +52,39 @@ DocId MemoryIndex::add(const Document& doc) {
 
     for (const auto& term : doc_terms) ++doc_freq_[term];
     ++doc_count_;
+    rebuild_field_caches();  // keep flat scoring caches current (cheap, O(fields))
     return id;
 }
 
-SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) const {
-    SearchResult result;
-    if (doc_count_ == 0) return result;
-
-    // Per-field BM25F params + avglen stats, keyed by field_id.
-    std::unordered_map<std::uint32_t, bm25f::FieldParams> params;
-    std::unordered_map<std::uint32_t, bm25f::FieldStats> stats;
+void MemoryIndex::rebuild_field_caches() {
+    params_cache_.resize(fields_.size());
+    stats_cache_.resize(fields_.size());
     for (std::uint32_t i = 0; i < fields_.size(); ++i) {
-        params[i] = fields_[i].params;
+        params_cache_[i] = fields_[i].params;
         const auto tit = field_total_len_.find(i);
         const auto cit = field_doc_count_.find(i);
         double avg = 0.0;
         if (tit != field_total_len_.end() && cit != field_doc_count_.end() && cit->second > 0) {
             avg = static_cast<double>(tit->second) / static_cast<double>(cit->second);
         }
-        stats[i] = bm25f::FieldStats{.avg_len = avg};
+        stats_cache_[i].avg_len = avg;
     }
+}
+
+SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) const {
+    SearchResult result;
+    if (doc_count_ == 0) return result;
 
     const auto q_tokens = tokenize::tokenize(query, tok_);
 
-    // doc_id -> accumulated score across query terms.
-    std::unordered_map<DocId, double> scores;
+    // Reusable per-thread scratch — no heap allocation per query after warmup,
+    // and nothing on the index is mutated (search is read-only → concurrency-safe).
+    thread_local std::vector<double> scores;      // doc_id -> accumulated score
+    thread_local std::vector<std::uint8_t> seen;  // doc_id -> touched this query
+    thread_local std::vector<DocId> touched;      // the doc_ids we touched
+    thread_local std::vector<bm25f::FieldHit> grp;  // field hits for one doc run
+    if (scores.size() < doc_count_) { scores.assign(doc_count_, 0.0); seen.assign(doc_count_, 0); }
+    touched.clear();
 
     for (const auto& qt : q_tokens) {
         const auto pit = postings_.find(qt.text);
@@ -86,30 +94,46 @@ SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) cons
         const std::uint64_t df = (dfit != doc_freq_.end()) ? dfit->second : 0;
         const double idf = bm25f::idf(doc_count_, df);
 
-        // Gather this term's per-field hits grouped by doc, then BM25F-score
-        // (sum field contributions BEFORE saturation — the BM25F invariant).
-        std::unordered_map<DocId, std::vector<bm25f::FieldHit>> by_doc;
-        for (const auto& p : pit->second) {
-            by_doc[p.doc_id].push_back(bm25f::FieldHit{
-                .field_id = p.field_id, .term_freq = p.term_freq, .field_len = p.field_len});
-        }
-        for (const auto& [doc_id, hits] : by_doc) {
-            const double tf_tilde = bm25f::pseudo_tf(hits, params, stats);
-            scores[doc_id] += bm25f::score_term(idf, tf_tilde, global_);
+        // Postings for a term are doc-ascending and same-doc-contiguous (add() is
+        // append-only and pushes one doc's fields together), so we stream
+        // contiguous runs of a single doc and score them — no per-doc map.
+        // Sum field contributions BEFORE saturation (the BM25F invariant).
+        const auto& plist = pit->second;
+        const std::size_t n = plist.size();
+        std::size_t i = 0;
+        while (i < n) {
+            const DocId doc = plist[i].doc_id;
+            grp.clear();
+            while (i < n && plist[i].doc_id == doc) {
+                grp.push_back(bm25f::FieldHit{
+                    .field_id = plist[i].field_id, .term_freq = plist[i].term_freq,
+                    .field_len = plist[i].field_len});
+                ++i;
+            }
+            const double tf_tilde = bm25f::pseudo_tf(grp, params_cache_, stats_cache_);
+            if (!seen[doc]) { seen[doc] = 1; touched.push_back(doc); }
+            scores[doc] += bm25f::score_term(idf, tf_tilde, global_);
         }
     }
 
-    result.total_matched = scores.size();
-    result.hits.reserve(scores.size());
-    for (const auto& [doc_id, s] : scores) {
-        if (s > 0.0) result.hits.push_back(Hit{.doc_id = doc_id, .score = s});
+    result.total_matched = touched.size();  // distinct docs that matched a term
+    result.hits.reserve(touched.size());
+    for (const DocId doc : touched) {
+        if (scores[doc] > 0.0) result.hits.push_back(Hit{.doc_id = doc, .score = scores[doc]});
+        scores[doc] = 0.0;  // reset scratch for the next query
+        seen[doc] = 0;
     }
-    std::sort(result.hits.begin(), result.hits.end(),
-              [](const Hit& a, const Hit& b) {
-                  if (a.score != b.score) return a.score > b.score;
-                  return a.doc_id < b.doc_id;  // stable tiebreak
-              });
-    if (top_k > 0 && result.hits.size() > top_k) result.hits.resize(top_k);
+
+    const auto cmp = [](const Hit& a, const Hit& b) {
+        if (a.score != b.score) return a.score > b.score;
+        return a.doc_id < b.doc_id;  // stable tiebreak
+    };
+    if (top_k > 0 && result.hits.size() > top_k) {
+        std::partial_sort(result.hits.begin(), result.hits.begin() + top_k, result.hits.end(), cmp);
+        result.hits.resize(top_k);
+    } else {
+        std::sort(result.hits.begin(), result.hits.end(), cmp);
+    }
     return result;
 }
 
