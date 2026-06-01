@@ -72,16 +72,20 @@ private:
         std::uint32_t term_freq;
         std::uint32_t field_len;  // token count of that field in that doc
     };
+    // A term's full entry: its postings + the doc-frequency (for IDF). Folding
+    // df in here means search does ONE hash lookup per query term, not two.
+    struct PostingList {
+        std::vector<Posting> postings;
+        std::uint64_t doc_freq = 0;  // # distinct docs containing the term
+    };
 
     std::vector<FieldConfig> fields_;
     std::unordered_map<std::string, std::uint32_t> field_id_;       // name -> id
     bm25f::Params global_;
     tokenize::Options tok_;
 
-    // term -> postings (across all fields/docs)
-    std::unordered_map<std::string, std::vector<Posting>> postings_;
-    // term -> # distinct docs containing it (for IDF)
-    std::unordered_map<std::string, std::uint64_t> doc_freq_;
+    // term -> {postings across all fields/docs, doc-frequency}
+    std::unordered_map<std::string, PostingList> postings_;
 
     // per-field running totals to derive avglen_f at search time
     std::unordered_map<std::uint32_t, std::uint64_t> field_total_len_;

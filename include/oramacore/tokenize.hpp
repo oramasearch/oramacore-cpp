@@ -44,6 +44,10 @@ struct Token {
 // counts term frequency).
 [[nodiscard]] std::vector<Token> tokenize(std::string_view text, const Options& opts = {});
 
+// Same pipeline, but writes into a caller-owned buffer (cleared + reused) to
+// avoid a per-call allocation on hot paths (e.g. tokenizing every query).
+void tokenize_into(std::string_view text, const Options& opts, std::vector<Token>& out);
+
 // --- pieces, exposed for testing + the experiment UI's "show me each step" ---
 
 // Lowercase ASCII (UTF-8 passthrough for non-ASCII bytes).

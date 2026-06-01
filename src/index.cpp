@@ -40,7 +40,7 @@ DocId MemoryIndex::add(const Document& doc) {
         for (const auto& t : tokens) ++tf[t.text];
 
         for (const auto& [term, freq] : tf) {
-            postings_[term].push_back(Posting{
+            postings_[term].postings.push_back(Posting{
                 .doc_id = id, .field_id = field_id,
                 .term_freq = freq, .field_len = field_len});
             doc_terms.insert(term);
@@ -50,7 +50,7 @@ DocId MemoryIndex::add(const Document& doc) {
         field_doc_count_[field_id] += 1;
     }
 
-    for (const auto& term : doc_terms) ++doc_freq_[term];
+    for (const auto& term : doc_terms) ++postings_[term].doc_freq;
     ++doc_count_;
     rebuild_field_caches();  // keep flat scoring caches current (cheap, O(fields))
     return id;
@@ -75,14 +75,13 @@ SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) cons
     SearchResult result;
     if (doc_count_ == 0) return result;
 
-    const auto q_tokens = tokenize::tokenize(query, tok_);
-
     // Reusable per-thread scratch — no heap allocation per query after warmup,
     // and nothing on the index is mutated (search is read-only → concurrency-safe).
+    thread_local std::vector<tokenize::Token> q_tokens;  // reused query-token buffer
     thread_local std::vector<double> scores;      // doc_id -> accumulated score
     thread_local std::vector<std::uint8_t> seen;  // doc_id -> touched this query
     thread_local std::vector<DocId> touched;      // the doc_ids we touched
-    thread_local std::vector<bm25f::FieldHit> grp;  // field hits for one doc run
+    tokenize::tokenize_into(query, tok_, q_tokens);
     if (scores.size() < doc_count_) { scores.assign(doc_count_, 0.0); seen.assign(doc_count_, 0); }
     touched.clear();
 
@@ -90,27 +89,30 @@ SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) cons
         const auto pit = postings_.find(qt.text);
         if (pit == postings_.end()) continue;
 
-        const auto dfit = doc_freq_.find(qt.text);
-        const std::uint64_t df = (dfit != doc_freq_.end()) ? dfit->second : 0;
+        const std::uint64_t df = pit->second.doc_freq;
         const double idf = bm25f::idf(doc_count_, df);
 
         // Postings for a term are doc-ascending and same-doc-contiguous (add() is
         // append-only and pushes one doc's fields together), so we stream
-        // contiguous runs of a single doc and score them — no per-doc map.
-        // Sum field contributions BEFORE saturation (the BM25F invariant).
-        const auto& plist = pit->second;
+        // contiguous runs of a single doc, accumulating the per-field BM25F
+        // pseudo-tf INLINE (sum field contributions BEFORE saturation) — no
+        // per-doc buffer, no second hash lookup, just flat array reads.
+        const auto& plist = pit->second.postings;
         const std::size_t n = plist.size();
         std::size_t i = 0;
         while (i < n) {
             const DocId doc = plist[i].doc_id;
-            grp.clear();
+            double tf_tilde = 0.0;
             while (i < n && plist[i].doc_id == doc) {
-                grp.push_back(bm25f::FieldHit{
-                    .field_id = plist[i].field_id, .term_freq = plist[i].term_freq,
-                    .field_len = plist[i].field_len});
+                const Posting& p = plist[i];
+                const bm25f::FieldParams& fp = params_cache_[p.field_id];
+                const double avg_len = stats_cache_[p.field_id].avg_len;
+                const double len_ratio = (avg_len > 0.0)
+                    ? (static_cast<double>(p.field_len) / avg_len) : 1.0;
+                const double denom = 1.0 - fp.b + fp.b * len_ratio;
+                if (denom > 0.0) tf_tilde += fp.weight * (static_cast<double>(p.term_freq) / denom);
                 ++i;
             }
-            const double tf_tilde = bm25f::pseudo_tf(grp, params_cache_, stats_cache_);
             if (!seen[doc]) { seen[doc] = 1; touched.push_back(doc); }
             scores[doc] += bm25f::score_term(idf, tf_tilde, global_);
         }

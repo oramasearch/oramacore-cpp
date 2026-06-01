@@ -79,8 +79,8 @@ std::string stem(std::string_view word, Locale locale) {
     return w;
 }
 
-std::vector<Token> tokenize(std::string_view text, const Options& opts) {
-    std::vector<Token> tokens;
+void tokenize_into(std::string_view text, const Options& opts, std::vector<Token>& out) {
+    out.clear();
     const std::string norm = opts.lowercase ? normalize(text) : std::string(text);
 
     std::size_t i = 0;
@@ -98,12 +98,17 @@ std::vector<Token> tokenize(std::string_view text, const Options& opts) {
         std::string tok = opts.stem ? stem(raw, opts.locale) : std::string(raw);
         if (tok.size() < opts.min_token_len) continue;
 
-        tokens.push_back(Token{
+        out.push_back(Token{
             .text = std::move(tok),
             .start = static_cast<std::uint32_t>(start),
             .length = static_cast<std::uint32_t>(i - start),
         });
     }
+}
+
+std::vector<Token> tokenize(std::string_view text, const Options& opts) {
+    std::vector<Token> tokens;
+    tokenize_into(text, opts, tokens);
     return tokens;
 }
 
