@@ -23,6 +23,7 @@ option(ORAMACORE_CPP_CAPY "Build against Boost.Capy coroutine runtime (D23)" OFF
 add_library(oramacore-cpp STATIC
   src/bm25f.cpp
   src/tokenize.cpp
+  src/index.cpp
 )
 add_library(orama::oramacore-cpp ALIAS oramacore-cpp)
 target_include_directories(oramacore-cpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

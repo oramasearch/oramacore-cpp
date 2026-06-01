@@ -46,8 +46,9 @@ struct SearchResult {
 // Minimal in-memory BM25F index.
 class MemoryIndex {
 public:
-    // Define the fields up front (name + BM25F params). Unknown fields in a
-    // document are ignored. Defaults: weight 1.0, b 0.75.
+    // Declare known fields up front to give them custom BM25F params (e.g. a
+    // boosted "title"). Any other field a document carries is auto-registered
+    // with defaults (weight 1.0, b 0.75) — so arbitrary document shapes index.
     explicit MemoryIndex(std::vector<FieldConfig> fields,
                          bm25f::Params global = {},
                          tokenize::Options tok = {});

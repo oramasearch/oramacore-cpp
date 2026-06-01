@@ -20,9 +20,17 @@ DocId MemoryIndex::add(const Document& doc) {
     std::set<std::string> doc_terms;
 
     for (const auto& [name, text] : doc) {
-        const auto fit = field_id_.find(name);
-        if (fit == field_id_.end()) continue;  // unknown field — ignore
-        const std::uint32_t field_id = fit->second;
+        // Auto-register fields on first sight (default params) so any document
+        // shape is indexable — fields declared up front keep their custom
+        // weight/b; everything else gets sensible defaults.
+        std::uint32_t field_id;
+        if (const auto fit = field_id_.find(name); fit != field_id_.end()) {
+            field_id = fit->second;
+        } else {
+            field_id = static_cast<std::uint32_t>(fields_.size());
+            fields_.push_back(FieldConfig{.name = name, .params = {}});
+            field_id_[name] = field_id;
+        }
 
         const auto tokens = tokenize::tokenize(text, tok_);
         const std::uint32_t field_len = static_cast<std::uint32_t>(tokens.size());
