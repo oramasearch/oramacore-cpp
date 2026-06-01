@@ -27,6 +27,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include <sys/resource.h>  // getrusage — peak RSS
+
 #include "oramacore/index.hpp"
 #include "oramacore/tokenize.hpp"
 #include "oramacore/version.hpp"
@@ -34,6 +36,14 @@
 using Clock = std::chrono::steady_clock;
 static double ms_since(Clock::time_point t0) {
     return std::chrono::duration<double, std::milli>(Clock::now() - t0).count();
+}
+
+// Peak resident-set high-water mark in MB. macOS reports ru_maxrss in BYTES
+// (Linux uses KB) — we measure on macOS, so divide by 1e6.
+static double peak_rss_mb() {
+    struct rusage ru {};
+    getrusage(RUSAGE_SELF, &ru);
+    return static_cast<double>(ru.ru_maxrss) / 1e6;
 }
 
 // Minimal quote-aware CSV split (parse cost is measured separately from engine).
@@ -97,6 +107,7 @@ int main(int argc, char** argv) {
         }
     }
     const double parse_ms = ms_since(t);
+    const double rss_after_parse_mb = peak_rss_mb();  // raw CSV + parsed rows resident
 
     // For --single-field: the lexical text columns concatenated into one field
     // (so it matches a single Rust StringStorage / single-field BM25).
@@ -136,6 +147,7 @@ int main(int argc, char** argv) {
     double build_ms = ms_since(t);
     for (int i = 1; i < index_loops; ++i) { auto tmp = build_index(); (void)tmp; }
     if (index_loops > 1) build_ms = ms_since(t) / index_loops;  // avg per build
+    const double rss_after_build_mb = peak_rss_mb();  // + the in-RAM index
 
     // ---- build a realistic query pool from the data (names / cities / companies) ----
     std::vector<std::string> terms;
@@ -225,5 +237,8 @@ int main(int argc, char** argv) {
         std::printf("  latency us:   mean %.2f | p50 %.2f | p90 %.2f | p99 %.2f | max %.2f\n",
                     mean_us, pct(50), pct(90), pct(99), pct(99.99));
     std::printf("  (top-k=%zu, avg work/query sink=%llu)\n", topk, (unsigned long long)sink);
+    const double rss_peak_mb = peak_rss_mb();
+    std::printf("MEMORY:         peak RSS %.0f MB | index in-RAM ~%.0f MB | on-disk 0 MB (pure in-memory)\n",
+                rss_peak_mb, rss_after_build_mb - rss_after_parse_mb);
     return 0;
 }

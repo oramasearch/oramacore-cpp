@@ -88,6 +88,32 @@ fn parse_csv(path: &str) -> Vec<Row> {
     rows
 }
 
+/// Peak resident-set high-water mark in MB. macOS reports ru_maxrss in BYTES
+/// (Linux uses KB) — we measure on macOS, so divide by 1e6.
+fn peak_rss_mb() -> f64 {
+    let mut ru: libc::rusage = unsafe { std::mem::zeroed() };
+    unsafe { libc::getrusage(libc::RUSAGE_SELF, &mut ru) };
+    ru.ru_maxrss as f64 / 1e6
+}
+
+/// Total size in bytes of everything under `path` (recursive) — the on-disk
+/// index segment footprint (OramaCore persists an FST + mmap segment).
+fn dir_size_bytes(path: &std::path::Path) -> u64 {
+    let mut total = 0u64;
+    if let Ok(entries) = std::fs::read_dir(path) {
+        for e in entries.flatten() {
+            if let Ok(md) = e.metadata() {
+                if md.is_dir() {
+                    total += dir_size_bytes(&e.path());
+                } else {
+                    total += md.len();
+                }
+            }
+        }
+    }
+    total
+}
+
 /// nearest-rank percentile over a sorted slice of nanosecond latencies; returns microseconds.
 fn percentile_us(sorted_ns: &[u64], p: f64) -> f64 {
     if sorted_ns.is_empty() {
@@ -111,6 +137,7 @@ fn run_dataset(label: &str, path: &str, n_queries: usize, warmup: usize) {
     // Pre-materialize the per-doc field text (NOT timed — matches C++ which
     // builds the row strings before the timed index loop).
     let texts: Vec<String> = rows.iter().map(|r| r.field_text()).collect();
+    let rss_after_parse = peak_rss_mb();  // rows + texts resident, before the index
 
     // A single shared parser for indexing + query-pool building + query tokenization.
     let index_parser = TextParser::from_locale(Locale::EN);
@@ -145,7 +172,7 @@ fn run_dataset(label: &str, path: &str, n_queries: usize, warmup: usize) {
     let index_path: PathBuf = tmp.path().join("string_index");
 
     let build_start = Instant::now();
-    let storage = StringStorage::new(index_path, oramacore_fields::string::SegmentConfig::default())
+    let storage = StringStorage::new(index_path.clone(), oramacore_fields::string::SegmentConfig::default())
         .expect("create StringStorage");
     for (doc_id, text) in texts.iter().enumerate() {
         let value: IndexedValue = indexer
@@ -155,6 +182,11 @@ fn run_dataset(label: &str, path: &str, n_queries: usize, warmup: usize) {
     }
     storage.compact(1).expect("compact");
     let build_elapsed = build_start.elapsed();
+
+    // Memory footprint of the index: in-RAM growth (small — it's mmap'd from
+    // disk) and the actual on-disk segment size (where OramaCore's index lives).
+    let rss_after_build = peak_rss_mb();
+    let on_disk_mb = dir_size_bytes(&index_path) as f64 / 1e6;
 
     let build_ms = build_elapsed.as_secs_f64() * 1000.0;
     let build_docs_per_sec = n as f64 / build_elapsed.as_secs_f64();
@@ -286,6 +318,14 @@ fn run_dataset(label: &str, path: &str, n_queries: usize, warmup: usize) {
     println!("latency p90 us      : {:.2}", p90);
     println!("latency p99 us      : {:.2}", p99);
     println!("latency max us      : {:.1}", max);
+    // NOTE on the metrics: OramaCore builds the index in an in-RAM LiveLayer and
+    // then `compact`s it to an on-disk segment, so `build peak RAM` is a transient
+    // spike during build — the index itself ends up *on disk* (`on-disk`), not
+    // resident. (The C++ engine, by contrast, holds the index in RAM, so its
+    // "in-RAM index" delta is the steady-state resident footprint.)
+    println!("peak RSS mb         : {:.0}", peak_rss_mb());
+    println!("build peak RAM mb   : {:.0}", rss_after_build - rss_after_parse);
+    println!("index on-disk mb    : {:.0}", on_disk_mb);
 }
 
 fn main() {

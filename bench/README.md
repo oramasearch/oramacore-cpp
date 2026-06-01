@@ -65,6 +65,17 @@ RUSTFLAGS="-C target-cpu=native" cargo build --release
 | 2M p99 (µs) | 1004 | 97 | 10.4× |
 | 2M max (µs) | 14,887 | 1,003 | 14.8× |
 
+**Memory** (peak RSS · index footprint · build spike — full detail + how-to-read in [`RESULTS.md`](RESULTS.md))
+| | Rust (OramaCore, on-disk) | C++ (in-memory) |
+|---|---|---|
+| 2M peak process RSS | 9.4 GB | 2.0 GB |
+| 2M index footprint | 388 MB (on disk) | ~403 MB (resident RAM) |
+| 2M build-time RAM spike | ~8.7 GB transient | in-place |
+
+![memory comparison](memory-results.svg)
+
+The raw index is **~the same size both ways** (~390–400 MB at 2M) — the difference is *where it lives*: C++ keeps it resident in RAM (fast, jitter-free tail), OramaCore `compact`s it to a disk segment (low steady RAM, but the page-fault tail **and** an ~8.7 GB build-time spike — it holds the whole index in a `LiveLayer` before persisting). Probed with `getrusage(ru_maxrss)`; regenerate the chart via [`plot_memory.py`](plot_memory.py).
+
 ## Caveats — this is NOT strictly like-for-like (both asymmetries favor C++)
 
 1. **Tokenizer asymmetry.** Rust runs OramaCore's full EN pipeline per query (regex Unicode

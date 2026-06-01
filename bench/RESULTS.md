@@ -45,6 +45,47 @@ never debug.**
 
 ---
 
+## Memory (peak RSS · build spike · index size)
+
+Captured with `getrusage(ru_maxrss)` (peak process RSS, **bytes on macOS**) plus the
+on-disk segment size for Rust. Compiler flags barely move memory, so one figure per
+engine per dataset (C++ max-opt, Rust after-max). **Peak RSS includes the bench's own
+CSV parse + row storage** (identical protocol both sides), not just the engine — the
+*index footprint* rows isolate the engine.
+
+| dataset | metric | **C++ (in-memory)** | **Rust / OramaCore (on-disk)** |
+|---|---|---|---|
+| 10k | peak process RSS | 17 MB | 73 MB |
+| 10k | index footprint | ~4 MB *(resident RAM)* | 2 MB *(on disk)* |
+| 10k | build-time RAM spike | — *(in-place)* | 63 MB |
+| 2M | peak process RSS | **2.0 GB** | **9.4 GB** |
+| 2M | index footprint | **~403 MB** *(resident RAM)* | **388 MB** *(on disk)* |
+| 2M | build-time RAM spike | — *(in-place)* | **~8.7 GB transient** |
+
+![Memory: C++ in-memory vs OramaCore/Rust on-disk — peak RSS, index footprint, build-time RAM at 10k and 2M](memory-results.svg)
+
+*(Regenerate after a re-run: edit the numbers in [`plot_memory.py`](plot_memory.py) and `python3 plot_memory.py`.)*
+
+### How to read this — the memory models are *opposite*
+- **C++ is pure in-memory.** The index lives in RAM (~403 MB at 2M) and stays there;
+  that resident cost is what buys the fast, jitter-free search tail. The build is
+  in-place, so there's no separate build spike.
+- **Rust / OramaCore is on-disk.** It builds the index in an in-RAM `LiveLayer`, then
+  `compact`s it to a persistent FST + mmap **segment on disk** (~388 MB at 2M).
+  Steady-state resident RAM is low (it pages the segment in on demand) — but that
+  paging *is* the 2M latency tail (p99 ~1 ms, max ~15 ms). And because the build holds
+  the whole index in RAM before compacting, it **spikes to ~8.7 GB at 2M** — roughly
+  **20× its on-disk size** — before dropping back.
+
+> **Net:** the *raw index is ~the same size both ways* (~390–400 MB at 2M) — same data,
+> both compact. The difference is *where it lives*: **C++ trades RAM for latency; Rust
+> trades latency (and a large build spike) for a small steady-state RAM footprint.**
+> A desktop whose dataset fits in RAM wants the C++ profile; a box indexing far more
+> than fits in memory wants the on-disk profile. Watch OramaCore's ~8.7 GB build
+> transient as a real provisioning constraint for large bulk-index jobs.
+
+---
+
 ## Takeaways
 
 - **Maxing the Rust flags was essentially neutral.** Fat LTO + `target-cpu=native`

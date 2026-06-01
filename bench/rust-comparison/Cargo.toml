@@ -13,6 +13,7 @@ oramacore_lib = "0.4.4"
 csv = "1"
 serde_json = "1"
 tempfile = "3"
+libc = "0.2"  # getrusage (peak RSS)
 
 [profile.release]
 opt-level = 3

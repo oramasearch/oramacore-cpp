@@ -1893,6 +1893,7 @@ name = "orama-rust-bm25-bench"
 version = "0.1.0"
 dependencies = [
  "csv",
+ "libc",
  "oramacore_fields",
  "oramacore_lib",
  "serde_json",
