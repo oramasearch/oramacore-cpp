@@ -43,6 +43,8 @@ RUSTFLAGS="-C target-cpu=native" cargo build --release
 
 ## Results (2026-05-31, same machine, both max-opt)
 
+![benchmark results](benchmark-results.png)
+
 **Index build**
 | | Rust (OramaCore) | C++ (oramacore-cpp) | C++ advantage |
 |---|---|---|---|
