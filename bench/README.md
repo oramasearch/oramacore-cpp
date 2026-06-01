@@ -45,6 +45,10 @@ RUSTFLAGS="-C target-cpu=native" cargo build --release
 
 ![benchmark results](benchmark-results.png)
 
+> Full numbers — including the Rust **before vs after** maxing the compiler flags
+> (thin-LTO vs fat-LTO+`target-cpu=native`) alongside the C++ max-opt build — are
+> in **[`RESULTS.md`](RESULTS.md)**.
+
 **Index build**
 | | Rust (OramaCore) | C++ (oramacore-cpp) | C++ advantage |
 |---|---|---|---|
