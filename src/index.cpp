@@ -57,17 +57,22 @@ DocId MemoryIndex::add(const Document& doc) {
 }
 
 void MemoryIndex::rebuild_field_caches() {
-    params_cache_.resize(fields_.size());
-    stats_cache_.resize(fields_.size());
+    fscore_.resize(fields_.size());
     for (std::uint32_t i = 0; i < fields_.size(); ++i) {
-        params_cache_[i] = fields_[i].params;
         const auto tit = field_total_len_.find(i);
         const auto cit = field_doc_count_.find(i);
         double avg = 0.0;
         if (tit != field_total_len_.end() && cit != field_doc_count_.end() && cit->second > 0) {
             avg = static_cast<double>(tit->second) / static_cast<double>(cit->second);
         }
-        stats_cache_[i].avg_len = avg;
+        const double b = fields_[i].params.b;
+        FieldScore fs;
+        fs.weight = fields_[i].params.weight;
+        // denom = 1 − b + b·(len/avglen) = (1−b) + (b/avglen)·len  →  c0 + c1·len.
+        // avglen == 0 (field unseen) ⇒ len_ratio defined as 1 ⇒ denom == 1.
+        if (avg > 0.0) { fs.c0 = 1.0 - b; fs.c1 = b / avg; }
+        else { fs.c0 = 1.0; fs.c1 = 0.0; }
+        fscore_[i] = fs;
     }
 }
 
@@ -128,12 +133,9 @@ SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) cons
         double tf_tilde = 0.0;
         while (i < n && plist[i].doc_id == doc) {
             const Posting& p = plist[i];
-            const bm25f::FieldParams& fp = params_cache_[p.field_id];
-            const double avg_len = stats_cache_[p.field_id].avg_len;
-            const double len_ratio = (avg_len > 0.0)
-                ? (static_cast<double>(p.field_len) / avg_len) : 1.0;
-            const double denom = 1.0 - fp.b + fp.b * len_ratio;
-            if (denom > 0.0) tf_tilde += fp.weight * (static_cast<double>(p.term_freq) / denom);
+            const FieldScore& fs = fscore_[p.field_id];
+            const double denom = fs.c0 + fs.c1 * static_cast<double>(p.field_len);
+            if (denom > 0.0) tf_tilde += fs.weight * (static_cast<double>(p.term_freq) / denom);
             ++i;
         }
         return tf_tilde;

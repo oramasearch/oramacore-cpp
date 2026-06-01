@@ -61,11 +61,13 @@ int main(int argc, char** argv) {
     std::size_t topk = 100;
     double search_secs = 0.0;
     int index_loops = 1;
+    bool single_field = false;  // concatenate text cols into one BM25 field (Rust-comparable)
     for (int i = 2; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--searches") && i + 1 < argc) n_searches = std::stoul(argv[++i]);
         else if (!std::strcmp(argv[i], "--topk") && i + 1 < argc) topk = std::stoul(argv[++i]);
         else if (!std::strcmp(argv[i], "--search-secs") && i + 1 < argc) search_secs = std::stod(argv[++i]);
         else if (!std::strcmp(argv[i], "--index-loops") && i + 1 < argc) index_loops = std::stoi(argv[++i]);
+        else if (!std::strcmp(argv[i], "--single-field")) single_field = true;
     }
 
     // ---- read file ----
@@ -96,11 +98,33 @@ int main(int argc, char** argv) {
     }
     const double parse_ms = ms_since(t);
 
+    // For --single-field: the lexical text columns concatenated into one field
+    // (so it matches a single Rust StringStorage / single-field BM25).
+    std::vector<int> textcols;
+    {
+        auto colidx = [&](const char* name) -> int {
+            for (std::size_t i = 0; i < headers.size(); ++i) if (headers[i] == name) return (int)i;
+            return -1;
+        };
+        for (const char* nm : {"First Name", "Last Name", "Company", "City", "Country"}) {
+            const int c = colidx(nm);
+            if (c >= 0) textcols.push_back(c);
+        }
+    }
+
     auto build_index = [&]() {
         oramacore::index::MemoryIndex idx({});  // all columns auto-registered
         for (const auto& r : rows) {
             oramacore::index::Document doc;
-            for (std::size_t c = 0; c < headers.size() && c < r.size(); ++c) doc[headers[c]] = r[c];
+            if (single_field) {
+                std::string t;
+                for (int c : textcols) {
+                    if (c < (int)r.size()) { if (!t.empty()) t += ' '; t += r[c]; }
+                }
+                doc["text"] = std::move(t);
+            } else {
+                for (std::size_t c = 0; c < headers.size() && c < r.size(); ++c) doc[headers[c]] = r[c];
+            }
             idx.add(doc);
         }
         return idx;

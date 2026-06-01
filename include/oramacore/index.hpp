@@ -93,11 +93,18 @@ private:
 
     std::uint64_t doc_count_ = 0;
 
-    // Flat per-field scoring caches (indexed by field_id), rebuilt on add().
-    // They let search() stay allocation-free AND fully read-only — so it's safe
-    // to call concurrently (e.g. from the decode-loop coroutines).
-    std::vector<bm25f::FieldParams> params_cache_;
-    std::vector<bm25f::FieldStats> stats_cache_;
+    // Flat per-field scoring cache (indexed by field_id), rebuilt on add(). The
+    // BM25F length-normalization is precomputed into denom = c0 + c1·field_len,
+    // so the hot scoring loop has NO per-posting divide for normalization (the
+    // b/avglen divide is hoisted here, once per build). This is also the
+    // branchless, gather-free form a NEON kernel would vectorize. Keeps search()
+    // allocation-free + read-only (safe to call concurrently).
+    struct FieldScore {
+        double weight = 1.0;  // w_f
+        double c0 = 1.0;      // 1 − b_f         (or 1.0 when avglen_f == 0)
+        double c1 = 0.0;      // b_f / avglen_f  (or 0.0 when avglen_f == 0)
+    };
+    std::vector<FieldScore> fscore_;
     void rebuild_field_caches();
 };
 
