@@ -143,6 +143,8 @@ int main(int argc, char** argv) {
     };
 
     // ---- search ----
+    std::fprintf(stderr, "SEARCH_PHASE_BEGIN\n");
+    std::fflush(stderr);
     std::uint64_t sink = 0;
     std::size_t did = 0;
     double search_ms = 0.0;

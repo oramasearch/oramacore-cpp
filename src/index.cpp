@@ -75,67 +75,114 @@ SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) cons
     SearchResult result;
     if (doc_count_ == 0) return result;
 
-    // Reusable per-thread scratch — no heap allocation per query after warmup,
-    // and nothing on the index is mutated (search is read-only → concurrency-safe).
+    // Search is read-only on the index (concurrency-safe); all scratch is
+    // per-thread + reused, so there's no heap allocation per query after warmup.
     thread_local std::vector<tokenize::Token> q_tokens;  // reused query-token buffer
-    thread_local std::vector<double> scores;      // doc_id -> accumulated score
-    thread_local std::vector<std::uint8_t> seen;  // doc_id -> touched this query
-    thread_local std::vector<DocId> touched;      // the doc_ids we touched
     tokenize::tokenize_into(query, tok_, q_tokens);
-    if (scores.size() < doc_count_) { scores.assign(doc_count_, 0.0); seen.assign(doc_count_, 0); }
-    touched.clear();
 
+    // Resolve query terms to posting lists once (a single hash lookup per term).
+    struct ActiveTerm { double idf; const std::vector<Posting>* postings; };
+    thread_local std::vector<ActiveTerm> active;
+    active.clear();
     for (const auto& qt : q_tokens) {
         const auto pit = postings_.find(qt.text);
         if (pit == postings_.end()) continue;
+        active.push_back(ActiveTerm{
+            bm25f::idf(doc_count_, pit->second.doc_freq), &pit->second.postings});
+    }
+    if (active.empty()) return result;
 
-        const std::uint64_t df = pit->second.doc_freq;
-        const double idf = bm25f::idf(doc_count_, df);
+    // Final ranking order, and the "worst-on-top" order for the bounded top-k
+    // heap (so we can compare a candidate against the current worst and evict).
+    const auto better = [](const Hit& a, const Hit& b) {
+        if (a.score != b.score) return a.score > b.score;
+        return a.doc_id < b.doc_id;
+    };
+    const auto worse_than = [](const Hit& a, const Hit& b) {
+        if (a.score != b.score) return a.score < b.score;
+        return a.doc_id > b.doc_id;
+    };
+    thread_local std::vector<Hit> heap;  // bounded to top_k (worst on top); reused
+    heap.clear();
+    const bool bounded = (top_k > 0);
+    const auto consider = [&](DocId doc, double s) {
+        if (s <= 0.0) return;
+        const Hit h{.doc_id = doc, .score = s};
+        if (!bounded) { heap.push_back(h); return; }  // top_k == 0 means "all"
+        if (heap.size() < top_k) {
+            heap.push_back(h);
+            std::push_heap(heap.begin(), heap.end(), worse_than);
+        } else if (worse_than(heap.front(), h)) {  // h ranks above the current worst
+            std::pop_heap(heap.begin(), heap.end(), worse_than);
+            heap.back() = h;
+            std::push_heap(heap.begin(), heap.end(), worse_than);
+        }
+    };
 
-        // Postings for a term are doc-ascending and same-doc-contiguous (add() is
-        // append-only and pushes one doc's fields together), so we stream
-        // contiguous runs of a single doc, accumulating the per-field BM25F
-        // pseudo-tf INLINE (sum field contributions BEFORE saturation) — no
-        // per-doc buffer, no second hash lookup, just flat array reads.
-        const auto& plist = pit->second.postings;
+    // Score one doc's contiguous posting run for one term (advances i). Postings
+    // for a term are doc-ascending and same-doc-contiguous (append-only add()),
+    // so a doc's fields are adjacent. Sum field contributions BEFORE saturation.
+    const auto score_run = [&](const std::vector<Posting>& plist, std::size_t& i,
+                               std::size_t n) -> double {
+        const DocId doc = plist[i].doc_id;
+        double tf_tilde = 0.0;
+        while (i < n && plist[i].doc_id == doc) {
+            const Posting& p = plist[i];
+            const bm25f::FieldParams& fp = params_cache_[p.field_id];
+            const double avg_len = stats_cache_[p.field_id].avg_len;
+            const double len_ratio = (avg_len > 0.0)
+                ? (static_cast<double>(p.field_len) / avg_len) : 1.0;
+            const double denom = 1.0 - fp.b + fp.b * len_ratio;
+            if (denom > 0.0) tf_tilde += fp.weight * (static_cast<double>(p.term_freq) / denom);
+            ++i;
+        }
+        return tf_tilde;
+    };
+
+    std::uint64_t matched = 0;
+
+    if (active.size() == 1) {
+        // Single-term fast path: sequential read of one posting list straight
+        // into the bounded heap — no score buffer, no random scatter, no sort
+        // of the full candidate set.
+        const double idf = active[0].idf;
+        const auto& plist = *active[0].postings;
         const std::size_t n = plist.size();
-        std::size_t i = 0;
-        while (i < n) {
+        for (std::size_t i = 0; i < n;) {
             const DocId doc = plist[i].doc_id;
-            double tf_tilde = 0.0;
-            while (i < n && plist[i].doc_id == doc) {
-                const Posting& p = plist[i];
-                const bm25f::FieldParams& fp = params_cache_[p.field_id];
-                const double avg_len = stats_cache_[p.field_id].avg_len;
-                const double len_ratio = (avg_len > 0.0)
-                    ? (static_cast<double>(p.field_len) / avg_len) : 1.0;
-                const double denom = 1.0 - fp.b + fp.b * len_ratio;
-                if (denom > 0.0) tf_tilde += fp.weight * (static_cast<double>(p.term_freq) / denom);
-                ++i;
+            const double tf_tilde = score_run(plist, i, n);
+            ++matched;
+            consider(doc, bm25f::score_term(idf, tf_tilde, global_));
+        }
+    } else {
+        // Multi-term: accumulate per-doc scores across terms, then select. The
+        // dense score buffer is the only place a scatter is unavoidable.
+        thread_local std::vector<double> scores;      // doc_id -> accumulated score
+        thread_local std::vector<std::uint8_t> seen;  // doc_id -> touched this query
+        thread_local std::vector<DocId> touched;      // the doc_ids we touched
+        if (scores.size() < doc_count_) { scores.assign(doc_count_, 0.0); seen.assign(doc_count_, 0); }
+        touched.clear();
+        for (const auto& at : active) {
+            const auto& plist = *at.postings;
+            const std::size_t n = plist.size();
+            for (std::size_t i = 0; i < n;) {
+                const DocId doc = plist[i].doc_id;
+                const double tf_tilde = score_run(plist, i, n);
+                if (!seen[doc]) { seen[doc] = 1; touched.push_back(doc); }
+                scores[doc] += bm25f::score_term(at.idf, tf_tilde, global_);
             }
-            if (!seen[doc]) { seen[doc] = 1; touched.push_back(doc); }
-            scores[doc] += bm25f::score_term(idf, tf_tilde, global_);
+        }
+        matched = touched.size();
+        for (const DocId doc : touched) {
+            consider(doc, scores[doc]);
+            scores[doc] = 0.0;  // reset scratch for the next query
+            seen[doc] = 0;
         }
     }
 
-    result.total_matched = touched.size();  // distinct docs that matched a term
-    result.hits.reserve(touched.size());
-    for (const DocId doc : touched) {
-        if (scores[doc] > 0.0) result.hits.push_back(Hit{.doc_id = doc, .score = scores[doc]});
-        scores[doc] = 0.0;  // reset scratch for the next query
-        seen[doc] = 0;
-    }
-
-    const auto cmp = [](const Hit& a, const Hit& b) {
-        if (a.score != b.score) return a.score > b.score;
-        return a.doc_id < b.doc_id;  // stable tiebreak
-    };
-    if (top_k > 0 && result.hits.size() > top_k) {
-        std::partial_sort(result.hits.begin(), result.hits.begin() + top_k, result.hits.end(), cmp);
-        result.hits.resize(top_k);
-    } else {
-        std::sort(result.hits.begin(), result.hits.end(), cmp);
-    }
+    result.total_matched = matched;  // distinct docs that matched a query term
+    result.hits.assign(heap.begin(), heap.end());
+    std::sort(result.hits.begin(), result.hits.end(), better);
     return result;
 }
 
