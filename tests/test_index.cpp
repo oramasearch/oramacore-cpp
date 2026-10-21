@@ -71,6 +71,38 @@ TEST_CASE("empty index and no-match queries are safe", "[index]") {
     REQUIRE(idx.search("hello").hits.size() == 1);
 }
 
+TEST_CASE("top_k keeps the best hits whatever order they arrive in", "[index]") {
+    // Postings are scanned in DocId order, so inserting weakest-first makes the
+    // hits arrive in ascending score: the bounded heap must evict the worst kept
+    // hit, never the best.
+    auto ascending = make_index();
+    std::vector<ix::DocId> ids;
+    for (int tf = 1; tf <= 5; ++tf) {
+        std::string body;
+        for (int i = 0; i < 5; ++i) body += (i < tf) ? "postgres " : "filler ";
+        ids.push_back(ascending.add({{"title", "notes"}, {"body", body}}));
+    }
+    const auto all = ascending.search("postgres", 0);
+    REQUIRE(all.hits.size() == 5);
+    REQUIRE(all.hits[0].doc_id == ids[4]);  // tf 5 ranks first
+    for (std::size_t k = 1; k <= 5; ++k) {
+        const auto top = ascending.search("postgres", k);
+        REQUIRE(top.hits.size() == k);
+        for (std::size_t i = 0; i < k; ++i) {
+            REQUIRE(top.hits[i].doc_id == all.hits[i].doc_id);
+            REQUIRE(top.hits[i].score == all.hits[i].score);
+        }
+    }
+
+    // A tie at the cutoff keeps the lower DocIds (the documented tie-break).
+    auto ties = make_index();
+    for (int i = 0; i < 4; ++i) ties.add({{"body", "common term here"}});
+    const auto two = ties.search("common", 2);
+    REQUIRE(two.hits.size() == 2);
+    REQUIRE(two.hits[0].doc_id == 0);
+    REQUIRE(two.hits[1].doc_id == 1);
+}
+
 TEST_CASE("top_k caps results", "[index]") {
     auto idx = make_index();
     for (int i = 0; i < 5; ++i) idx.add({{"body", "common term here"}});

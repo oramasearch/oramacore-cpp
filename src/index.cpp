@@ -169,15 +169,14 @@ SearchResult MemoryIndex::search_impl(std::string_view query, std::size_t top_k,
     }
     if (active.empty()) return result;
 
-    // Final ranking order, and the "worst-on-top" order for the bounded top-k
-    // heap (so we can compare a candidate against the current worst and evict).
+    // The final ranking order. It is also the bounded top-k heap's comparator:
+    // std::*_heap keeps the element no other compares "after" on top, and under
+    // `better` that is the WORST hit — the one a better candidate evicts. (The
+    // heap used to be ordered by the inverse, which kept the BEST hit on top and
+    // evicted it, so hits arriving in ascending score order lost the best ones.)
     const auto better = [](const Hit& a, const Hit& b) {
         if (a.score != b.score) return a.score > b.score;
         return a.doc_id < b.doc_id;
-    };
-    const auto worse_than = [](const Hit& a, const Hit& b) {
-        if (a.score != b.score) return a.score < b.score;
-        return a.doc_id > b.doc_id;
     };
     thread_local std::vector<Hit> heap;  // bounded to top_k (worst on top); reused
     heap.clear();
@@ -188,11 +187,11 @@ SearchResult MemoryIndex::search_impl(std::string_view query, std::size_t top_k,
         if (!bounded) { heap.push_back(h); return; }  // top_k == 0 means "all"
         if (heap.size() < top_k) {
             heap.push_back(h);
-            std::push_heap(heap.begin(), heap.end(), worse_than);
-        } else if (worse_than(heap.front(), h)) {  // h ranks above the current worst
-            std::pop_heap(heap.begin(), heap.end(), worse_than);
+            std::push_heap(heap.begin(), heap.end(), better);
+        } else if (better(h, heap.front())) {  // h ranks above the current worst
+            std::pop_heap(heap.begin(), heap.end(), better);
             heap.back() = h;
-            std::push_heap(heap.begin(), heap.end(), worse_than);
+            std::push_heap(heap.begin(), heap.end(), better);
         }
     };
 
