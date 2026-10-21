@@ -56,6 +56,18 @@ DocId MemoryIndex::add(const Document& doc) {
     return id;
 }
 
+MemoryIndex::FieldScore MemoryIndex::field_score(const FieldConfig& field,
+                                                double avg_len) {
+    const double b = field.params.b;
+    FieldScore fs;
+    fs.weight = field.params.weight;
+    // denom = 1 − b + b·(len/avglen) = (1−b) + (b/avglen)·len  →  c0 + c1·len.
+    // avglen == 0 (field unseen) ⇒ len_ratio defined as 1 ⇒ denom == 1.
+    if (avg_len > 0.0) { fs.c0 = 1.0 - b; fs.c1 = b / avg_len; }
+    else { fs.c0 = 1.0; fs.c1 = 0.0; }
+    return fs;
+}
+
 void MemoryIndex::rebuild_field_caches() {
     fscore_.resize(fields_.size());
     for (std::uint32_t i = 0; i < fields_.size(); ++i) {
@@ -65,20 +77,74 @@ void MemoryIndex::rebuild_field_caches() {
         if (tit != field_total_len_.end() && cit != field_doc_count_.end() && cit->second > 0) {
             avg = static_cast<double>(tit->second) / static_cast<double>(cit->second);
         }
-        const double b = fields_[i].params.b;
-        FieldScore fs;
-        fs.weight = fields_[i].params.weight;
-        // denom = 1 − b + b·(len/avglen) = (1−b) + (b/avglen)·len  →  c0 + c1·len.
-        // avglen == 0 (field unseen) ⇒ len_ratio defined as 1 ⇒ denom == 1.
-        if (avg > 0.0) { fs.c0 = 1.0 - b; fs.c1 = b / avg; }
-        else { fs.c0 = 1.0; fs.c1 = 0.0; }
-        fscore_[i] = fs;
+        fscore_[i] = field_score(fields_[i], avg);
     }
 }
 
+void CorpusStats::merge(const CorpusStats& other) {
+    doc_count += other.doc_count;
+    for (const auto& [term, df] : other.term_doc_freq) term_doc_freq[term] += df;
+    for (const auto& [name, lengths] : other.fields) {
+        FieldLengthStats& mine = fields[name];
+        mine.total_len += lengths.total_len;
+        mine.doc_count += lengths.doc_count;
+    }
+}
+
+CorpusStats MemoryIndex::stats(std::string_view query) const {
+    CorpusStats out;
+    out.doc_count = doc_count_;
+    std::vector<tokenize::Token> q_tokens;
+    tokenize::tokenize_into(query, tok_, q_tokens);
+    for (const auto& qt : q_tokens) {
+        const auto pit = postings_.find(qt.text);
+        out.term_doc_freq[qt.text] = (pit == postings_.end()) ? 0 : pit->second.doc_freq;
+    }
+    for (std::uint32_t i = 0; i < fields_.size(); ++i) {
+        FieldLengthStats lengths;
+        if (const auto tit = field_total_len_.find(i); tit != field_total_len_.end()) {
+            lengths.total_len = tit->second;
+        }
+        if (const auto cit = field_doc_count_.find(i); cit != field_doc_count_.end()) {
+            lengths.doc_count = cit->second;
+        }
+        out.fields[fields_[i].name] = lengths;
+    }
+    return out;
+}
+
 SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) const {
+    return search_impl(query, top_k, nullptr);
+}
+
+SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k,
+                                 const CorpusStats& global) const {
+    return search_impl(query, top_k, &global);
+}
+
+SearchResult MemoryIndex::search_impl(std::string_view query, std::size_t top_k,
+                                      const CorpusStats* global) const {
     SearchResult result;
     if (doc_count_ == 0) return result;
+
+    // The corpus statistics to score with: this index's own, or the supplied
+    // global view (falling back to our own for anything it does not carry).
+    const std::uint64_t total_docs =
+        (global != nullptr && global->doc_count > 0) ? global->doc_count : doc_count_;
+    thread_local std::vector<FieldScore> global_fscore;  // reused per query
+    if (global != nullptr) {
+        global_fscore = fscore_;
+        for (std::uint32_t i = 0; i < fields_.size(); ++i) {
+            const auto fit = global->fields.find(fields_[i].name);
+            if (fit == global->fields.end()) continue;  // keep our own
+            const double avg = fit->second.doc_count > 0
+                ? static_cast<double>(fit->second.total_len) /
+                      static_cast<double>(fit->second.doc_count)
+                : 0.0;
+            global_fscore[i] = field_score(fields_[i], avg);
+        }
+    }
+    const std::vector<FieldScore>& fscore = (global != nullptr) ? global_fscore : fscore_;
 
     // Search is read-only on the index (concurrency-safe); all scratch is
     // per-thread + reused, so there's no heap allocation per query after warmup.
@@ -92,8 +158,14 @@ SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) cons
     for (const auto& qt : q_tokens) {
         const auto pit = postings_.find(qt.text);
         if (pit == postings_.end()) continue;
-        active.push_back(ActiveTerm{
-            bm25f::idf(doc_count_, pit->second.doc_freq), &pit->second.postings});
+        std::uint64_t doc_freq = pit->second.doc_freq;
+        if (global != nullptr) {
+            if (const auto git = global->term_doc_freq.find(qt.text);
+                git != global->term_doc_freq.end()) {
+                doc_freq = git->second;
+            }
+        }
+        active.push_back(ActiveTerm{bm25f::idf(total_docs, doc_freq), &pit->second.postings});
     }
     if (active.empty()) return result;
 
@@ -133,7 +205,7 @@ SearchResult MemoryIndex::search(std::string_view query, std::size_t top_k) cons
         double tf_tilde = 0.0;
         while (i < n && plist[i].doc_id == doc) {
             const Posting& p = plist[i];
-            const FieldScore& fs = fscore_[p.field_id];
+            const FieldScore& fs = fscore[p.field_id];
             const double denom = fs.c0 + fs.c1 * static_cast<double>(p.field_len);
             if (denom > 0.0) tf_tilde += fs.weight * (static_cast<double>(p.term_freq) / denom);
             ++i;
