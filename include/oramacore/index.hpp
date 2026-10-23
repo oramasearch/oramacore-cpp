@@ -43,6 +43,33 @@ struct SearchResult {
     std::uint64_t total_matched = 0;
 };
 
+// One field's length totals: the sum of its token counts over the documents
+// that carry it, and how many documents carry it. avglen_f = total_len / doc_count.
+struct FieldLengthStats {
+    std::uint64_t total_len = 0;
+    std::uint64_t doc_count = 0;
+
+    bool operator==(const FieldLengthStats&) const = default;
+};
+
+// The corpus statistics BM25F scores with: the document count N, each query
+// term's document frequency n (keyed by the ANALYZED term — tokenized, stemmed),
+// and each field's length totals (keyed by field name). A sharded search gathers
+// one CorpusStats per shard (MemoryIndex::stats), merges them (merge() sums every
+// count), and hands the merged view back to every shard's search(): each shard
+// then scores exactly as one index over the whole corpus would.
+struct CorpusStats {
+    std::uint64_t doc_count = 0;
+    std::unordered_map<std::string, std::uint64_t> term_doc_freq;
+    std::unordered_map<std::string, FieldLengthStats> fields;
+
+    // Add another shard's statistics into this one (every count sums; shards
+    // hold disjoint documents).
+    void merge(const CorpusStats& other);
+
+    bool operator==(const CorpusStats&) const = default;
+};
+
 // Minimal in-memory BM25F index.
 class MemoryIndex {
 public:
@@ -61,6 +88,22 @@ public:
     // Multi-term: per-term BM25F scores are summed per document. `top_k` caps
     // the returned hits (0 = all).
     [[nodiscard]] SearchResult search(std::string_view query, std::size_t top_k = 10) const;
+
+    // This index's corpus statistics for `query`: the document count, the
+    // document frequency of every analyzed query term (0 for a term this index
+    // has never seen, so a merge covers every term), and the length totals of
+    // every field this index knows.
+    [[nodiscard]] CorpusStats stats(std::string_view query) const;
+
+    // search() scored with externally supplied corpus statistics instead of this
+    // index's own: IDF reads `global.doc_count` and `global.term_doc_freq`, and
+    // the length normalization reads `global.fields`. Pass the merge of every
+    // shard's stats() and each shard ranks exactly as one consolidated index over
+    // all of them would, so a per-shard `top_k` cutoff drops nothing that belongs
+    // in the global top k. A term, field or document count `global` does not
+    // carry falls back to this index's own value.
+    [[nodiscard]] SearchResult search(std::string_view query, std::size_t top_k,
+                                      const CorpusStats& global) const;
 
     [[nodiscard]] std::uint64_t doc_count() const { return doc_count_; }
     [[nodiscard]] std::size_t field_count() const { return fields_.size(); }
@@ -106,6 +149,14 @@ private:
     };
     std::vector<FieldScore> fscore_;
     void rebuild_field_caches();
+
+    // One field's scoring constants from its params and average length.
+    static FieldScore field_score(const FieldConfig& field, double avg_len);
+
+    // The scoring loop shared by both search() overloads: `global` null scores
+    // with this index's own statistics.
+    SearchResult search_impl(std::string_view query, std::size_t top_k,
+                             const CorpusStats* global) const;
 };
 
 }  // namespace oramacore::index

@@ -20,6 +20,28 @@ score(t,d) = IDF(t) · tf~ / (k1 + tf~)
 - **IDF:** `ln(1 + (N − n + 0.5)/(n + 0.5))` (Robertson/Sparck-Jones, always positive) — matches OramaCore.
 - **Defaults:** `w_f = 1.0`, `b_f = 0.75`, global `k1 = 1.2`.
 
+## Sharded scoring: corpus statistics from outside the index
+
+`N`, `df_t` and `avglen_f` are **corpus** statistics, so a shard that scores with its own sees a
+different corpus than the whole: a shard where a term is rare gives it a high IDF, a shard where it
+is everywhere gives it almost none. A per-shard `top_k` cutoff taken on those local scores can drop
+a document that belongs in the global top k (zetta [#851](https://github.com/oramasearch/zetta/issues/851)).
+
+`MemoryIndex` carries the global-statistics pass (the `dfs_query_then_fetch` shape) for a caller
+that shards it:
+
+- `stats(query)` — this index's `CorpusStats` for the query: `doc_count`, each analyzed query term's
+  document frequency (0 when unseen, so a merge covers every term), and every field's
+  `{total_len, doc_count}`.
+- `CorpusStats::merge(other)` — sums every count (shards hold disjoint documents).
+- `search(query, top_k, global)` — scores with the merged statistics instead of the index's own
+  (anything `global` does not carry falls back to the local value).
+
+Scored with the merge of every shard's `stats()`, each shard's scores are **bit-identical** to one
+index over all of them (the same integer inputs reach the same `idf` and `avglen` arithmetic), so
+the per-shard cutoff is safe. [`tests/test_index.cpp`](../tests/test_index.cpp) (`[stats]`) pins
+this on a deliberately skewed two-shard corpus.
+
 ## Source map (OramaCore Rust → here)
 
 | OramaCore (Rust) | What it does | oramacore-cpp target |
