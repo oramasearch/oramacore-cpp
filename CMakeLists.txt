@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.28)
-project(oramacore-cpp LANGUAGES CXX)
+project(oramacore-cpp VERSION 0.1.0 LANGUAGES CXX)
 
 # oramacore-cpp: a C++23 rewrite of the OramaCore search engine.
 # First index type: BM25F full-text (see docs/bm25f-port-notes.md).
@@ -47,6 +47,10 @@ if(BUILD_TESTING)
   FetchContent_MakeAvailable(Catch2)
   add_executable(oramacore-cpp-tests tests/test_main.cpp tests/test_bm25f.cpp tests/test_tokenize.cpp tests/test_index.cpp)
   target_link_libraries(oramacore-cpp-tests PRIVATE oramacore-cpp Catch2::Catch2WithMain)
+  # The version in the code is the project's, and it has release notes.
+  target_compile_definitions(oramacore-cpp-tests PRIVATE ORAMACORE_CPP_PROJECT_VERSION="${PROJECT_VERSION}")
+  add_test(NAME release-notes-exist
+           COMMAND ${CMAKE_COMMAND} -E cat ${CMAKE_CURRENT_SOURCE_DIR}/docs/releases/v${PROJECT_VERSION}.md)
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
   include(Catch)
   catch_discover_tests(oramacore-cpp-tests)

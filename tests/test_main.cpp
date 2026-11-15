@@ -8,6 +8,7 @@
 TEST_CASE("version is set", "[scaffold]") {
     REQUIRE(oramacore::kName == "oramacore-cpp");
     REQUIRE_FALSE(oramacore::kVersion.empty());
+    REQUIRE(oramacore::kVersion == ORAMACORE_CPP_PROJECT_VERSION);
 }
 
 TEST_CASE("Result carries success and failure", "[scaffold]") {

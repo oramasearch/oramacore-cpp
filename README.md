@@ -73,7 +73,7 @@ ctest --test-dir build --output-on-failure
 
 ## Status
 
-Early. The index is in memory and append-only: deleting or updating a document is not supported
+The current release is **v0.1.0** ([release notes](docs/releases/v0.1.0.md)). It is early. The index is in memory and append-only: deleting or updating a document is not supported
 yet, and nothing is persisted. The tokenizer handles English, with a minimal stemmer. Asynchronous
 search on Boost.Capy coroutines is planned behind `-DORAMACORE_CPP_CAPY=ON`; scoring stays
 synchronous.
