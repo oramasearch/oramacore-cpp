@@ -2,7 +2,7 @@
 
 #pragma once
 // oramacore::Result<T> = std::expected<T, oramacore::Error>
-// No exceptions cross the public API boundary (Orama Platform D7/D16).
+// No exceptions cross the public API boundary.
 #include <expected>
 #include <string>
 #include <utility>

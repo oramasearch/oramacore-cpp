@@ -3,10 +3,10 @@
 cmake_minimum_required(VERSION 3.28)
 project(oramacore-cpp LANGUAGES CXX)
 
-# Orama Platform — oramacore-cpp: the C++23 port of OramaCore's engine.
+# oramacore-cpp: a C++23 rewrite of the OramaCore search engine.
 # First index type: BM25F full-text (see docs/bm25f-port-notes.md).
-# Library-first (D16); C++23 today, C++26 target (D7); coroutines via Boost.Capy
-# (D23) — async index/search ops are co_await-shaped. Lives under the data node.
+# A library; C++23 today, C++26 as the target; coroutines via Boost.Capy, so
+# async index and search operations are co_await-shaped.
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -15,12 +15,12 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Capy (the coroutine I/O foundation, D23) is added via FetchContent behind this
+# Capy (the coroutine I/O foundation) is added via FetchContent behind this
 # option once we wire async search/index. The scaffold is Capy-free so it builds
 # anywhere; the public API is designed to be coroutine-shaped (task<T>-returning).
-option(ORAMACORE_CPP_CAPY "Build against Boost.Capy coroutine runtime (D23)" OFF)
+option(ORAMACORE_CPP_CAPY "Build against Boost.Capy coroutine runtime" OFF)
 
-# Library-first (D16). The BM25F scoring core is compiled; later subsystems
+# A library. The BM25F scoring core is compiled; later subsystems
 # (tokenization, posting lists, committed index, async search) join here.
 add_library(oramacore-cpp STATIC
   src/bm25f.cpp

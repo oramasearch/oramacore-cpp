@@ -15,7 +15,7 @@
 //
 // This header is the scaffold contract: pure, testable scoring math now;
 // the posting lists / committed index / async search land later (coroutine-
-// shaped via Boost.Capy, D23). No exceptions across the API (D7/D16).
+// shaped via Boost.Capy). No exceptions cross the public API.
 #include <cstdint>
 #include <string>
 #include <unordered_map>
@@ -87,7 +87,7 @@ struct FieldHit {
 // TODO (port milestones — see docs/bm25f-port-notes.md):
 //   - Tokenization (port the `nlp` crate: stemming + stop-words).
 //   - Posting lists + the uncommitted→committed two-index pattern.
-//   - co_await search over the committed index (Boost.Capy task<T>, D23).
+//   - co_await search over the committed index (Boost.Capy task<T>).
 //   - Multi-term query scoring + the score-accumulation order.
 // ---------------------------------------------------------------------------
 
