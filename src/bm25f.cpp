@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "oramacore/bm25f.hpp"
 
 #include <cmath>

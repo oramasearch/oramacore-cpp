@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 // oramacore::Result<T> = std::expected<T, oramacore::Error>
 // No exceptions cross the public API boundary (Orama Platform D7/D16).

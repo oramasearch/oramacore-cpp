@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "oramacore/tokenize.hpp"
 
 #include <array>

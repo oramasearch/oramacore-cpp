@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 // BM25F — the first index type ported from OramaCore (its full-text scorer, ported
 // as it is). See docs/bm25f-port-notes.md.
