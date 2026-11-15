@@ -4,13 +4,13 @@
 // MemoryIndex — a minimal in-memory BM25F full-text index: add documents,
 // search them. Ties together the tokenizer + posting lists + per-field stats +
 // the BM25F scorer. This is the "uncommitted" (write-optimized) index of the
-// two-index pattern; the committed/mmap tier + async search (Boost.Capy, D23)
-// come in later milestones (#98/#99). Synchronous + pure-ish for now so the
-// experiment GUI can call it directly and it's trivially testable.
+// two-index pattern; the committed/mmap tier + async search (Boost.Capy)
+// come in later milestones. Synchronous for now, so it is easy to call and to
+// test.
 //
 // A document is a set of named fields (e.g. "title", "body"); BM25F weights and
 // length-normalizes per field (that's the whole point — see bm25f.hpp).
-// No exceptions across the API (D7/D16).
+// No exceptions cross the public API.
 #include <cstdint>
 #include <string>
 #include <string_view>
