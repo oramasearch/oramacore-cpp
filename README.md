@@ -13,6 +13,8 @@ cmake -S . -B build -G Ninja && cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
+> **Field limits:** `MemoryIndex` auto-registers the fields documents carry, so it bounds how many and how long (`Limits`: 1,000,000 fields, 1,000,000 per document, 1024-byte names by default), and `add()` returns `Result<DocId>`, refusing a document over a limit with the index unchanged ([port notes → Field limits](docs/bm25f-port-notes.md#field-limits-oramacore-cpp4)).
+
 > Scaffold: the BM25F **scoring core** is implemented + unit-tested (`idf` / `pseudo_tf` / `score`). Tokenization, posting lists, the two-index pattern, and async search land per the milestone order in the port notes.
 
 ## Stack

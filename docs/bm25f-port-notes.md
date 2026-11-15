@@ -42,6 +42,34 @@ index over all of them (the same integer inputs reach the same `idf` and `avglen
 the per-shard cutoff is safe. [`tests/test_index.cpp`](../tests/test_index.cpp) (`[stats]`) pins
 this on a deliberately skewed two-shard corpus.
 
+## Field limits (oramacore-cpp#4)
+
+Field names come from the documents: any field a document carries that the index has not seen is
+auto-registered. Their number and length are therefore input, and `MemoryIndex` bounds them with
+`Limits` (the fourth constructor argument):
+
+| Limit | Default | Refused when |
+|---|---|---|
+| `max_fields` | 1,000,000 | the document's new fields would take the registered fields (declared + auto) past it |
+| `max_fields_per_document` | 1,000,000 | the document carries more fields than this |
+| `max_field_name_length` | 1024 bytes | a new field's name is longer |
+
+`add()` returns `Result<DocId>`: a refused document gets an `Error` saying which limit it broke, and
+the index is unchanged (the checks run before anything is written).
+
+The cost of a document no longer grows with the number of registered fields:
+
+- `add()` updates the scoring constants of the fields the document touched, not every field's (an
+  untouched field's `avglen_f` does not move). Indexing N documents that each bring one new field is
+  linear, not quadratic.
+- `search(query, top_k, global)` computes a field's global constants the first time one of the
+  query's postings reaches it, instead of copying and recomputing the whole per-field cache on every
+  query.
+- `stats()` still reports every registered field (a merge needs them all); `max_fields` bounds it.
+
+`[limits]` in [`tests/test_index.cpp`](../tests/test_index.cpp) pins each limit and the unchanged
+index; the hidden `[benchmark]` case times 100,000 documents with one new field each.
+
 ## Source map (OramaCore Rust → here)
 
 | OramaCore (Rust) | What it does | oramacore-cpp target |

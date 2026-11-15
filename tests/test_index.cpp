@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include <chrono>
 #include <string>
 
 #include "oramacore/index.hpp"
@@ -15,9 +16,9 @@ static ix::MemoryIndex make_index() {
 
 TEST_CASE("add + search returns matching docs ranked", "[index]") {
     auto idx = make_index();
-    idx.add({{"title", "Postgres tuning guide"}, {"body", "how to tune a postgres database for speed"}});
-    idx.add({{"title", "Cooking pasta"},         {"body", "boil water, add salt, add pasta"}});
-    idx.add({{"title", "Database indexes"},       {"body", "btree, gin, brin, and postgres indexes explained"}});
+    REQUIRE(idx.add({{"title", "Postgres tuning guide"}, {"body", "how to tune a postgres database for speed"}}).has_value());
+    REQUIRE(idx.add({{"title", "Cooking pasta"},         {"body", "boil water, add salt, add pasta"}}).has_value());
+    REQUIRE(idx.add({{"title", "Database indexes"},       {"body", "btree, gin, brin, and postgres indexes explained"}}).has_value());
 
     REQUIRE(idx.doc_count() == 3);
 
@@ -31,8 +32,8 @@ TEST_CASE("add + search returns matching docs ranked", "[index]") {
 
 TEST_CASE("title weight boosts a title match over a body-only match", "[index]") {
     auto idx = make_index();
-    const auto a = idx.add({{"title", "widget"},      {"body", "nothing relevant here at all"}}); // term in title
-    const auto b = idx.add({{"title", "unrelated"},   {"body", "widget appears only in the body text"}}); // term in body
+    const auto a = idx.add({{"title", "widget"},      {"body", "nothing relevant here at all"}}).value(); // term in title
+    const auto b = idx.add({{"title", "unrelated"},   {"body", "widget appears only in the body text"}}).value(); // term in body
 
     auto r = idx.search("widget");
     REQUIRE(r.hits.size() == 2);
@@ -43,8 +44,8 @@ TEST_CASE("title weight boosts a title match over a body-only match", "[index]")
 
 TEST_CASE("multi-term query sums per-term scores", "[index]") {
     auto idx = make_index();
-    const auto both = idx.add({{"title", "fast postgres"}, {"body", "fast postgres queries"}});
-    const auto one  = idx.add({{"title", "fast cars"},     {"body", "fast cars go fast"}});
+    const auto both = idx.add({{"title", "fast postgres"}, {"body", "fast postgres queries"}}).value();
+    const auto one  = idx.add({{"title", "fast cars"},     {"body", "fast cars go fast"}}).value();
 
     auto r = idx.search("fast postgres");
     REQUIRE(r.hits.size() == 2);
@@ -55,7 +56,7 @@ TEST_CASE("multi-term query sums per-term scores", "[index]") {
 
 TEST_CASE("search uses the same tokenization as indexing (stemming/stop-words)", "[index]") {
     auto idx = make_index();
-    idx.add({{"title", "Running servers"}, {"body", "the servers are running quickly"}});
+    REQUIRE(idx.add({{"title", "Running servers"}, {"body", "the servers are running quickly"}}).has_value());
     // "server" (stem of servers) and "runn" (stem of running) should match;
     // "the"/"are" are stop-words and shouldn't matter.
     REQUIRE(idx.search("server").hits.size() == 1);
@@ -66,7 +67,7 @@ TEST_CASE("search uses the same tokenization as indexing (stemming/stop-words)",
 TEST_CASE("empty index and no-match queries are safe", "[index]") {
     auto idx = make_index();
     REQUIRE(idx.search("anything").hits.empty());
-    idx.add({{"title", "hello"}, {"body", "world"}});
+    REQUIRE(idx.add({{"title", "hello"}, {"body", "world"}}).has_value());
     REQUIRE(idx.search("nonexistentterm").hits.empty());
     REQUIRE(idx.search("hello").hits.size() == 1);
 }
@@ -80,7 +81,7 @@ TEST_CASE("top_k keeps the best hits whatever order they arrive in", "[index]") 
     for (int tf = 1; tf <= 5; ++tf) {
         std::string body;
         for (int i = 0; i < 5; ++i) body += (i < tf) ? "postgres " : "filler ";
-        ids.push_back(ascending.add({{"title", "notes"}, {"body", body}}));
+        ids.push_back(ascending.add({{"title", "notes"}, {"body", body}}).value());
     }
     const auto all = ascending.search("postgres", 0);
     REQUIRE(all.hits.size() == 5);
@@ -96,7 +97,7 @@ TEST_CASE("top_k keeps the best hits whatever order they arrive in", "[index]") 
 
     // A tie at the cutoff keeps the lower DocIds (the documented tie-break).
     auto ties = make_index();
-    for (int i = 0; i < 4; ++i) ties.add({{"body", "common term here"}});
+    for (int i = 0; i < 4; ++i) REQUIRE(ties.add({{"body", "common term here"}}).has_value());
     const auto two = ties.search("common", 2);
     REQUIRE(two.hits.size() == 2);
     REQUIRE(two.hits[0].doc_id == 0);
@@ -105,7 +106,7 @@ TEST_CASE("top_k keeps the best hits whatever order they arrive in", "[index]") 
 
 TEST_CASE("top_k caps results", "[index]") {
     auto idx = make_index();
-    for (int i = 0; i < 5; ++i) idx.add({{"body", "common term here"}});
+    for (int i = 0; i < 5; ++i) REQUIRE(idx.add({{"body", "common term here"}}).has_value());
     auto r = idx.search("common", /*top_k=*/3);
     REQUIRE(r.total_matched == 5);
     REQUIRE(r.hits.size() == 3);
@@ -144,8 +145,8 @@ struct SkewedCorpus {
     SkewedCorpus() {
         auto add = [&](ix::MemoryIndex& shard, std::vector<ix::DocId>& map,
                        const ix::Document& doc) {
-            shard.add(doc);
-            map.push_back(consolidated.add(doc));
+            REQUIRE(shard.add(doc).has_value());
+            map.push_back(consolidated.add(doc).value());
         };
         add(shard_a, a_to_all, {{"title", "notes"}, {"body", body_with(1)}});
         for (int i = 0; i < 9; ++i) {
@@ -161,8 +162,8 @@ struct SkewedCorpus {
 
 TEST_CASE("stats reports document count, term frequencies and field lengths", "[index][stats]") {
     auto idx = make_index();
-    idx.add({{"title", "Postgres tuning"}, {"body", "postgres vacuum"}});
-    idx.add({{"title", "Cooking"}, {"body", "boil water pasta"}});
+    REQUIRE(idx.add({{"title", "Postgres tuning"}, {"body", "postgres vacuum"}}).has_value());
+    REQUIRE(idx.add({{"title", "Cooking"}, {"body", "boil water pasta"}}).has_value());
 
     const ix::CorpusStats s = idx.stats("postgres unseenterm");
     REQUIRE(s.doc_count == 2);
@@ -222,4 +223,109 @@ TEST_CASE("shards scored with merged statistics rank exactly like one index", "[
     const double a_global = c.shard_a.search("postgres", 1, global).hits.at(0).score;
     const double b_global = c.shard_b.search("postgres", 1, global).hits.at(0).score;
     REQUIRE(b_global > a_global);
+}
+
+// ----- field limits (oramacore-cpp#4) ------------------------------------------
+//
+// Field names come from the documents, so their number and length are bounded,
+// and a document over a limit is refused with the index unchanged.
+
+TEST_CASE("a document past the field limit is refused and the index is unchanged",
+          "[index][limits]") {
+    ix::MemoryIndex idx({}, {}, {}, ix::Limits{.max_fields = 3});
+    REQUIRE(idx.add({{"a", "alpha"}, {"b", "beta"}}).has_value());
+    REQUIRE(idx.field_count() == 2);
+
+    const auto refused = idx.add({{"c", "gamma"}, {"d", "delta"}});
+    REQUIRE_FALSE(refused.has_value());
+    REQUIRE(refused.error().message.find("limit") != std::string::npos);
+    REQUIRE(idx.doc_count() == 1);
+    REQUIRE(idx.field_count() == 2);
+    REQUIRE(idx.search("gamma").hits.empty());
+    REQUIRE(idx.stats("gamma").fields.size() == 2);
+
+    // Known fields are not new fields: the index still takes documents within the limit.
+    REQUIRE(idx.add({{"a", "gamma"}, {"c", "delta"}}).has_value());
+    REQUIRE(idx.field_count() == 3);
+    REQUIRE(idx.search("gamma").hits.size() == 1);
+}
+
+TEST_CASE("declared fields count toward the field limit", "[index][limits]") {
+    ix::MemoryIndex idx({{.name = "title"}, {.name = "body"}}, {}, {},
+                        ix::Limits{.max_fields = 2});
+    REQUIRE(idx.add({{"title", "x"}, {"body", "y"}}).has_value());
+    REQUIRE_FALSE(idx.add({{"extra", "z"}}).has_value());
+    REQUIRE(idx.doc_count() == 1);
+}
+
+TEST_CASE("one document with more fields than the per-document limit is refused",
+          "[index][limits]") {
+    ix::MemoryIndex idx({}, {}, {}, ix::Limits{.max_fields_per_document = 4});
+    ix::Document wide;
+    for (int i = 0; i < 5; ++i) wide["f" + std::to_string(i)] = "text";
+    const auto refused = idx.add(wide);
+    REQUIRE_FALSE(refused.has_value());
+    REQUIRE(idx.doc_count() == 0);
+    REQUIRE(idx.field_count() == 0);
+}
+
+TEST_CASE("a field name longer than the limit is refused", "[index][limits]") {
+    ix::MemoryIndex idx({}, {}, {}, ix::Limits{.max_field_name_length = 8});
+    REQUIRE_FALSE(idx.add({{std::string(9, 'n'), "text"}}).has_value());
+    REQUIRE(idx.add({{std::string(8, 'n'), "text"}}).has_value());
+    REQUIRE(idx.field_count() == 1);
+}
+
+TEST_CASE("the default limits allow a million fields and 1 KiB names", "[index][limits]") {
+    ix::MemoryIndex idx({});
+    REQUIRE(idx.limits().max_fields == 1'000'000);
+    REQUIRE(idx.limits().max_fields_per_document == 1'000'000);
+    REQUIRE(idx.limits().max_field_name_length == 1024);
+
+    REQUIRE(idx.add({{std::string(1024, 'n'), "v"}}).has_value());
+    REQUIRE_FALSE(idx.add({{std::string(1025, 'n'), "v"}}).has_value());
+    REQUIRE(idx.field_count() == 1);
+}
+
+TEST_CASE("per-field scores stay right when a document touches only some fields",
+          "[index][limits]") {
+    // Incremental cache updates must give the same scores as a fresh index built
+    // in the same order (the full rebuild it replaced recomputed every field).
+    auto incremental = make_index();
+    REQUIRE(incremental.add({{"title", "postgres"}, {"body", "postgres tuning guide for speed"}}).has_value());
+    REQUIRE(incremental.add({{"body", "postgres"}}).has_value());
+    REQUIRE(incremental.add({{"title", "a much longer postgres title here"}}).has_value());
+    REQUIRE(incremental.add({{"extra", "postgres"}}).has_value());
+
+    const auto r = incremental.search("postgres", 0);
+    REQUIRE(r.hits.size() == 4);
+    const auto global = incremental.stats("postgres");
+    const auto g = incremental.search("postgres", 0, global);
+    REQUIRE(g.hits.size() == r.hits.size());
+    for (std::size_t i = 0; i < r.hits.size(); ++i) {
+        REQUIRE(g.hits[i].doc_id == r.hits[i].doc_id);
+        REQUIRE(g.hits[i].score == r.hits[i].score);
+    }
+}
+
+TEST_CASE("adding documents that each bring one new field grows linearly",
+          "[.][index][limits][benchmark]") {
+    // Hidden (timing): run with `oramacore-cpp-tests "[benchmark]"`, in a release build.
+    // 100,000 documents with one new field each used to cost O(N^2) (every add
+    // rebuilt every field's cache). Time the second half against the first: with
+    // per-document updates the halves cost about the same; the quadratic version
+    // made the second half about three times the first.
+    constexpr int kDocs = 100'000;
+    ix::MemoryIndex idx({}, {}, {}, ix::Limits{.max_fields = kDocs});
+    const auto half = [&](int from, int to) {
+        const auto start = std::chrono::steady_clock::now();
+        for (int i = from; i < to; ++i) {
+            REQUIRE(idx.add({{"f" + std::to_string(i), "word"}}).has_value());
+        }
+        return std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    };
+    const double first = half(0, kDocs / 2);
+    const double second = half(kDocs / 2, kDocs);
+    REQUIRE(idx.field_count() == static_cast<std::size_t>(kDocs));
+    REQUIRE(second < first * 2.0 + 0.05);
 }

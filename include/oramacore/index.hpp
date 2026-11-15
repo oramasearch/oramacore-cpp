@@ -70,19 +70,34 @@ struct CorpusStats {
     bool operator==(const CorpusStats&) const = default;
 };
 
+// Bounds on the fields an index registers. Field names come from the documents,
+// so their number and length are input. add() costs O(the document's fields), so
+// the bounds are generous; they stop a single document from being unbounded.
+struct Limits {
+    std::size_t max_fields = 1'000'000;              // registered fields, declared + auto
+    std::size_t max_fields_per_document = 1'000'000; // fields one document may carry
+    std::size_t max_field_name_length = 1024;        // bytes in an auto-registered name
+};
+
 // Minimal in-memory BM25F index.
 class MemoryIndex {
 public:
     // Declare known fields up front to give them custom BM25F params (e.g. a
     // boosted "title"). Any other field a document carries is auto-registered
-    // with defaults (weight 1.0, b 0.75) — so arbitrary document shapes index.
+    // with defaults (weight 1.0, b 0.75) — so arbitrary document shapes index —
+    // within `limits`.
     explicit MemoryIndex(std::vector<FieldConfig> fields,
                          bm25f::Params global = {},
-                         tokenize::Options tok = {});
+                         tokenize::Options tok = {},
+                         Limits limits = {});
 
     // Index a document; returns its assigned DocId. (Append-only for now —
-    // delete/upsert is a later milestone.)
-    DocId add(const Document& doc);
+    // delete/upsert is a later milestone.) Fails, leaving the index unchanged,
+    // when the document carries more than `max_fields_per_document` fields, a
+    // new field name longer than `max_field_name_length`, or new fields that
+    // would take the index past `max_fields`. Cost is O(the document's fields),
+    // not O(every registered field).
+    [[nodiscard]] Result<DocId> add(const Document& doc);
 
     // Search across all fields for `query` (tokenized the same way as docs).
     // Multi-term: per-term BM25F scores are summed per document. `top_k` caps
@@ -107,6 +122,7 @@ public:
 
     [[nodiscard]] std::uint64_t doc_count() const { return doc_count_; }
     [[nodiscard]] std::size_t field_count() const { return fields_.size(); }
+    [[nodiscard]] const Limits& limits() const { return limits_; }
 
 private:
     struct Posting {
@@ -126,6 +142,7 @@ private:
     std::unordered_map<std::string, std::uint32_t> field_id_;       // name -> id
     bm25f::Params global_;
     tokenize::Options tok_;
+    Limits limits_;
 
     // term -> {postings across all fields/docs, doc-frequency}
     std::unordered_map<std::string, PostingList> postings_;
@@ -136,7 +153,8 @@ private:
 
     std::uint64_t doc_count_ = 0;
 
-    // Flat per-field scoring cache (indexed by field_id), rebuilt on add(). The
+    // Flat per-field scoring cache (indexed by field_id), kept current by add()
+    // for the fields each document touches (the others' averages do not move). The
     // BM25F length-normalization is precomputed into denom = c0 + c1·field_len,
     // so the hot scoring loop has NO per-posting divide for normalization (the
     // b/avglen divide is hoisted here, once per build). This is also the
@@ -148,7 +166,8 @@ private:
         double c1 = 0.0;      // b_f / avglen_f  (or 0.0 when avglen_f == 0)
     };
     std::vector<FieldScore> fscore_;
-    void rebuild_field_caches();
+    void rebuild_field_caches();            // every field: construction only
+    void update_field_cache(std::uint32_t field_id);  // one field: add()
 
     // One field's scoring constants from its params and average length.
     static FieldScore field_score(const FieldConfig& field, double avg_len);
