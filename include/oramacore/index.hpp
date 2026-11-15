@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 // MemoryIndex — a minimal in-memory BM25F full-text index: add documents,
 // search them. Ties together the tokenizer + posting lists + per-field stats +

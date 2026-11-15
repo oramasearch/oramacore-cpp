@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // bench_csv — profile the oramacore-cpp BM25F engine on a real CSV.
 //
 // Build (RelWithDebInfo, with symbols, so `sample`/Instruments can attribute):

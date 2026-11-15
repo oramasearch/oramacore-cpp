@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 // Tokenization — the front of the full-text path (feeds BM25F posting lists).
 // A minimal, custom, dependency-free pipeline (no libstemmer / no Rust nlp dep,

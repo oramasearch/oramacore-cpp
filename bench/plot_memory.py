@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+
 """Render the memory comparison (C++ in-memory vs Rust/OramaCore on-disk) as a
 dependency-free SVG bar chart — no matplotlib (Homebrew Python 3.14 has no wheel).
 

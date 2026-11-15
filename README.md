@@ -33,3 +33,9 @@ ctest --test-dir build --output-on-failure
 The design of the port, the source map from OramaCore and the open questions are in
 [`docs/bm25f-port-notes.md`](docs/bm25f-port-notes.md). Benchmarks against OramaCore are in
 [`bench/`](bench/README.md).
+
+## License
+
+MIT, see [LICENSE](LICENSE). Third-party components and their licenses are in
+[THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES). Contributions are welcome under the Developer
+Certificate of Origin; see [CONTRIBUTING.md](CONTRIBUTING.md).

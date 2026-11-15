@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 //! Standalone microbenchmark of OramaCore's real on-disk BM25 string index
 //! (`oramacore_fields::string`) with the real `oramacore_lib` EN tokenizer/stemmer.
 //!
