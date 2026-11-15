@@ -1,6 +1,6 @@
 #pragma once
-// BM25F — the first index type ported from OramaCore (the crown-jewel full-text
-// scorer; Tommaso: "keep as is"). See docs/bm25f-port-notes.md.
+// BM25F — the first index type ported from OramaCore (its full-text scorer, ported
+// as it is). See docs/bm25f-port-notes.md.
 //
 // BM25F differs from plain BM25 in TWO ways (this is the whole point):
 //   1. per-field WEIGHT      w_f   — boost a field's contribution
