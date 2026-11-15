@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
-// BM25F — the first index type ported from OramaCore (the crown-jewel full-text
-// scorer; Tommaso: "keep as is"). See docs/bm25f-port-notes.md.
+// BM25F — the first index type ported from OramaCore (its full-text scorer, ported
+// as it is). See docs/bm25f-port-notes.md.
 //
 // BM25F differs from plain BM25 in TWO ways (this is the whole point):
 //   1. per-field WEIGHT      w_f   — boost a field's contribution
@@ -13,7 +15,7 @@
 //
 // This header is the scaffold contract: pure, testable scoring math now;
 // the posting lists / committed index / async search land later (coroutine-
-// shaped via Boost.Capy, D23). No exceptions across the API (D7/D16).
+// shaped via Boost.Capy). No exceptions cross the public API.
 #include <cstdint>
 #include <string>
 #include <unordered_map>
@@ -85,7 +87,7 @@ struct FieldHit {
 // TODO (port milestones — see docs/bm25f-port-notes.md):
 //   - Tokenization (port the `nlp` crate: stemming + stop-words).
 //   - Posting lists + the uncommitted→committed two-index pattern.
-//   - co_await search over the committed index (Boost.Capy task<T>, D23).
+//   - co_await search over the committed index (Boost.Capy task<T>).
 //   - Multi-term query scoring + the score-accumulation order.
 // ---------------------------------------------------------------------------
 

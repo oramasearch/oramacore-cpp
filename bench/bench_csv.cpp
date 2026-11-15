@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // bench_csv — profile the oramacore-cpp BM25F engine on a real CSV.
 //
 // Build (RelWithDebInfo, with symbols, so `sample`/Instruments can attribute):
@@ -136,7 +138,10 @@ int main(int argc, char** argv) {
             } else {
                 for (std::size_t c = 0; c < headers.size() && c < r.size(); ++c) doc[headers[c]] = r[c];
             }
-            idx.add(doc);
+            if (const auto added = idx.add(doc); !added) {
+                std::fprintf(stderr, "cannot index row: %s\n", added.error().message.c_str());
+                std::exit(1);
+            }
         }
         return idx;
     };

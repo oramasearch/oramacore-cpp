@@ -1,27 +1,88 @@
 # oramacore-cpp
 
-The **C++23 port of OramaCore's engine** for the [Orama Platform](https://github.com/oramasearch/orama-platform) — a leaner successor that keeps the crown jewels and drops the cruft (per the [keep/cut analysis](https://github.com/oramasearch/orama-platform/blob/main/docs/projects/orama-platform/oramacore-what-to-keep.md)).
+A C++23 rewrite of the [OramaCore](https://github.com/oramasearch/oramacore) search engine, built to
+be faster and to use less memory. It is a library: you link it into your program and index and search
+documents in process.
 
-**First index type: BM25F** full-text — the highest-value subsystem (~90% of real queries; Tommaso: *"keep as is"*). Other index types (prefix/FST, geo, filters, vector-if-kept) follow the same pattern. Async index/search is **coroutine-native via Boost.Capy** ([D23](https://github.com/oramasearch/orama-platform/blob/main/docs/projects/orama-platform/architecture.md#d23)); the module is a **library** ([D16](https://github.com/oramasearch/orama-platform/blob/main/docs/projects/orama-platform/architecture.md#d16)) that lives under the [data node](https://github.com/oramasearch/data-node).
+Today it provides **BM25F full-text search** over an in-memory index. Other index types (prefix,
+geo, filters, vector) are planned, one at a time.
 
-> **Port notes (start here):** [`docs/bm25f-port-notes.md`](docs/bm25f-port-notes.md) — the BM25F math, the OramaCore source map, the milestone order, and the Capy shape.
+## What you get
 
-## Build
+- **BM25F scoring** across the fields of a document, with a weight and a length normalization per
+  field. Field contributions are summed before saturation, as BM25F defines it.
+- **Any document shape.** A document is a map of field name to text. Fields you declare up front
+  keep their own weight; any other field is registered on first sight with defaults.
+- **Sharded search.** Each shard reports its corpus statistics (`stats()`), you merge them, and every
+  shard then scores with the merged view, so results match one index over the whole corpus.
+- **Bounded input.** `Limits` caps the fields an index registers: 1,000,000 fields, 1,000,000 per
+  document and 1 KiB names by default, all configurable. A document over a limit is refused and the
+  index is unchanged. Adding a document costs time in proportion to its own fields.
+- **No exceptions across the API.** Calls that can fail return `Result<T>` (`std::expected<T, Error>`).
+
+## Performance
+
+Measured against OramaCore's BM25 index on the same machine and data (2 million rows), both built at
+full optimization:
+
+| | OramaCore (Rust) | oramacore-cpp |
+|---|---|---|
+| Index build | 16.1 s | 4.63 s |
+| Search throughput | 13.2k queries/s | 119k queries/s |
+| Search latency, p99 | 1,004 µs | 97 µs |
+| Peak memory | 9.4 GB | 2.0 GB |
+
+The comparison is not exactly like for like: OramaCore runs a fuller language pipeline (a Snowball
+stemmer) and persists its index to disk, while this library keeps the index in memory with a simpler
+stemmer. [`bench/`](bench/README.md) has the protocol, the full results and how to run both.
+
+## Use it
+
+```cpp
+#include "oramacore/index.hpp"
+
+namespace ix = oramacore::index;
+
+ix::MemoryIndex index({{.name = "title", .params = {.weight = 2.0}}});
+
+if (auto added = index.add({{"title", "Postgres tuning guide"},
+                            {"body", "how to tune a postgres database"}}); !added) {
+    // added.error().message says which limit the document broke
+}
+
+const auto result = index.search("postgres tuning", /*top_k=*/10);
+for (const auto& hit : result.hits) {
+    // hit.doc_id, hit.score
+}
+```
+
+In CMake, add the repository (for example with `FetchContent`) and link the target:
+
+```cmake
+target_link_libraries(your_target PRIVATE orama::oramacore-cpp)
+```
+
+## Build and test
+
+Needs a C++23 compiler, CMake 3.28 or later and Ninja. Catch2 is fetched for the tests.
 
 ```sh
 cmake -S . -B build -G Ninja && cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-> Scaffold: the BM25F **scoring core** is implemented + unit-tested (`idf` / `pseudo_tf` / `score`). Tokenization, posting lists, the two-index pattern, and async search land per the milestone order in the port notes.
+## Status
 
-## Stack
+The current release is **v0.1.0** ([release notes](docs/releases/v0.1.0.md)). It is early. The index is in memory and append-only: deleting or updating a document is not supported
+yet, and nothing is persisted. The tokenizer handles English, with a minimal stemmer. Asynchronous
+search on Boost.Capy coroutines is planned behind `-DORAMACORE_CPP_CAPY=ON`; scoring stays
+synchronous.
 
-- **C++23** (→ C++26 per [D7](https://github.com/oramasearch/orama-platform/blob/main/docs/projects/orama-platform/architecture.md#d7)), CMake ≥ 3.28 + Ninja, FetchContent, Catch2.
-- Coroutines via **Boost.Capy** (D23) — behind `-DORAMACORE_CPP_CAPY=ON` when async search lands; the scoring math stays synchronous.
-- `Result<T> = std::expected<T, Error>`; no exceptions across the public API. Links as `orama::oramacore-cpp`.
+How the engine works, and how it maps to OramaCore's source, is in
+[`docs/bm25f-port-notes.md`](docs/bm25f-port-notes.md).
 
-## Where the design lives
+## License
 
-Code only here. Strategy + architecture + the keep/cut + library-vs-adopt analysis live in [`oramasearch/orama-platform`](https://github.com/oramasearch/orama-platform):
-[`oramacore-what-to-keep.md`](https://github.com/oramasearch/orama-platform/blob/main/docs/projects/orama-platform/oramacore-what-to-keep.md) · [`research/oramacore-cpp-rebuild-alternatives.md`](https://github.com/oramasearch/orama-platform/blob/main/docs/projects/orama-platform/research/oramacore-cpp-rebuild-alternatives.md). Tracking: data-node [`#7`](https://github.com/oramasearch/orama-platform/issues/7) / engine interface [`#28`](https://github.com/oramasearch/orama-platform/issues/28).
+MIT, see [LICENSE](LICENSE). Third-party components and their licenses are in
+[THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES). Contributions are welcome under the Developer
+Certificate of Origin; see [CONTRIBUTING.md](CONTRIBUTING.md). Security reports: [SECURITY.md](SECURITY.md).

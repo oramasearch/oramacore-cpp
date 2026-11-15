@@ -1,13 +1,15 @@
+// SPDX-License-Identifier: MIT
+
 #pragma once
 // Tokenization — the front of the full-text path (feeds BM25F posting lists).
 // A minimal, custom, dependency-free pipeline (no libstemmer / no Rust nlp dep,
-// per the module decision): normalize -> split -> stop-word filter -> stem.
+// by design): normalize -> split -> stop-word filter -> stem.
 // English-only for now; the Locale knob is in the interface so other languages
 // slot in later without an API change.
 //
 // Pure/synchronous (no Boost.Capy) so it's trivially testable and reusable —
-// only the I/O boundary of the engine is coroutine-shaped (D23). No exceptions
-// across the API (D7/D16).
+// only the I/O boundary of the engine is coroutine-shaped. No exceptions
+// cross the public API.
 //
 // "Minimal stemmer" caveat: this is a small suffix-stripper (a tiny subset of
 // Porter), NOT full Snowball. Good enough to unblock posting lists (#97) and to

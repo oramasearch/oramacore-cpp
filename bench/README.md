@@ -38,7 +38,7 @@ cmake --build build-rel
 ```sh
 cd rust-comparison
 RUSTFLAGS="-C target-cpu=native" cargo build --release
-./target/release/bench            # BENCH_BREAKDOWN=1 for the index-build phase split
+BENCH_DATA_DIR=/path/to/csvs ./target/release/bench   # BENCH_BREAKDOWN=1 for the index-build phase split
 ```
 
 ## Results (2026-05-31, same machine, both max-opt)
@@ -97,5 +97,5 @@ pipeline* — not "the BM25 loop is 9× faster."
 Search is allocation-bound at small scale and **memory-latency-bound** on long posting lists, not
 FLOP-bound — removing a divide/posting did not move the 2M tail. So the levers are: zero per-query
 allocation (done), bounded top-k heap + single-term fast path (done), and — next — SoA/compressed
-postings + WAND skip. GPU/MLX stays off the hot path (see
-[`../../../docs/projects/orama-platform/research/mlx-for-bm25f-acceleration.md`](https://github.com/oramasearch/orama-platform/blob/main/docs/projects/orama-platform/research/mlx-for-bm25f-acceleration.md)).
+postings + WAND skip. GPU/MLX stays off the hot path: on long posting lists the cost is memory latency, which a GPU
+does not remove.

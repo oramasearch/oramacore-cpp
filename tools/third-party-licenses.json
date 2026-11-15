@@ -1,0 +1,2854 @@
+{
+ "repository": "oramacore-cpp",
+ "preamble": "The library itself depends only on the C++ standard library. Catch2 builds the tests. The\nRust crates listed after it are the dependency tree of the separate benchmark program in\nbench/rust-comparison, which compares this library with the Rust crates; they are not part of the\nlibrary, and their license texts are in each crate (cargo metadata lists them). The benchmark\nprogram depends on oramacore_fields and oramacore_lib, which are AGPL-3.0: a built benchmark binary is\ncovered by that license.",
+ "components": [
+  {
+   "name": "Catch2",
+   "version": "v3.7.1",
+   "license": "BSL-1.0",
+   "use": "fetched at build, tests only",
+   "source": "https://github.com/catchorg/Catch2",
+   "github": "catchorg/Catch2"
+  },
+  {
+   "name": "crate ahash",
+   "version": "0.8.12",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tkaitchuck/ahash",
+   "table_only": true
+  },
+  {
+   "name": "crate aho-corasick",
+   "version": "1.1.4",
+   "license": "Unlicense OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/BurntSushi/aho-corasick",
+   "table_only": true
+  },
+  {
+   "name": "crate android_system_properties",
+   "version": "0.1.5",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/nical/android_system_properties",
+   "table_only": true
+  },
+  {
+   "name": "crate anyhow",
+   "version": "1.0.102",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/anyhow",
+   "table_only": true
+  },
+  {
+   "name": "crate arc-swap",
+   "version": "1.9.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/vorner/arc-swap",
+   "table_only": true
+  },
+  {
+   "name": "crate arrayvec",
+   "version": "0.7.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bluss/arrayvec",
+   "table_only": true
+  },
+  {
+   "name": "crate async-trait",
+   "version": "0.1.89",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/async-trait",
+   "table_only": true
+  },
+  {
+   "name": "crate atomic-waker",
+   "version": "1.1.2",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smol-rs/atomic-waker",
+   "table_only": true
+  },
+  {
+   "name": "crate atomic-write-file",
+   "version": "0.2.3",
+   "license": "BSD-3-Clause",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/andreacorbellini/rust-atomic-write-file",
+   "table_only": true
+  },
+  {
+   "name": "crate auto_enums",
+   "version": "0.8.8",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/taiki-e/auto_enums",
+   "table_only": true
+  },
+  {
+   "name": "crate autocfg",
+   "version": "1.5.1",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/cuviper/autocfg",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-config",
+   "version": "1.8.17",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-credential-types",
+   "version": "1.2.14",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-lc-rs",
+   "version": "1.17.0",
+   "license": "ISC AND (Apache-2.0 OR ISC)",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/aws/aws-lc-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-lc-sys",
+   "version": "0.41.0",
+   "license": "ISC AND (Apache-2.0 OR ISC) AND Apache-2.0 AND MIT AND BSD-3-Clause AND (Apache-2.0 OR ISC OR MIT) AND (Apache-2.0 OR ISC OR MIT-0)",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/aws/aws-lc-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-runtime",
+   "version": "1.7.4",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-sdk-secretsmanager",
+   "version": "1.106.0",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/awslabs/aws-sdk-rust",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-sdk-sso",
+   "version": "1.100.0",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/awslabs/aws-sdk-rust",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-sdk-ssooidc",
+   "version": "1.102.0",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/awslabs/aws-sdk-rust",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-sdk-sts",
+   "version": "1.105.0",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/awslabs/aws-sdk-rust",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-sigv4",
+   "version": "1.4.4",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-async",
+   "version": "1.2.14",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-http",
+   "version": "0.63.6",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-http-client",
+   "version": "1.1.12",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-json",
+   "version": "0.62.6",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-observability",
+   "version": "0.2.6",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/awslabs/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-query",
+   "version": "0.60.15",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-runtime",
+   "version": "1.11.3",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-runtime-api",
+   "version": "1.12.1",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-runtime-api-macros",
+   "version": "1.0.0",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-schema",
+   "version": "0.1.0",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-types",
+   "version": "1.4.8",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-smithy-xml",
+   "version": "0.60.15",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate aws-types",
+   "version": "1.3.16",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smithy-lang/smithy-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate base64",
+   "version": "0.21.7",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/marshallpierce/rust-base64",
+   "table_only": true
+  },
+  {
+   "name": "crate base64",
+   "version": "0.22.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/marshallpierce/rust-base64",
+   "table_only": true
+  },
+  {
+   "name": "crate base64-simd",
+   "version": "0.8.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Nugine/simd",
+   "table_only": true
+  },
+  {
+   "name": "crate bincode",
+   "version": "1.3.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/bincode",
+   "table_only": true
+  },
+  {
+   "name": "crate bit-set",
+   "version": "0.5.3",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/contain-rs/bit-set",
+   "table_only": true
+  },
+  {
+   "name": "crate bit-vec",
+   "version": "0.6.3",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/contain-rs/bit-vec",
+   "table_only": true
+  },
+  {
+   "name": "crate bitflags",
+   "version": "2.11.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bitflags/bitflags",
+   "table_only": true
+  },
+  {
+   "name": "crate block-buffer",
+   "version": "0.10.4",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/utils",
+   "table_only": true
+  },
+  {
+   "name": "crate block-buffer",
+   "version": "0.12.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/utils",
+   "table_only": true
+  },
+  {
+   "name": "crate bstr",
+   "version": "1.12.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/BurntSushi/bstr",
+   "table_only": true
+  },
+  {
+   "name": "crate bumpalo",
+   "version": "3.20.3",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/fitzgen/bumpalo",
+   "table_only": true
+  },
+  {
+   "name": "crate bytemuck",
+   "version": "1.25.0",
+   "license": "Zlib OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Lokathor/bytemuck",
+   "table_only": true
+  },
+  {
+   "name": "crate byteorder",
+   "version": "1.5.0",
+   "license": "Unlicense OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/BurntSushi/byteorder",
+   "table_only": true
+  },
+  {
+   "name": "crate bytes",
+   "version": "1.11.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/bytes",
+   "table_only": true
+  },
+  {
+   "name": "crate bytes-utils",
+   "version": "0.1.4",
+   "license": "Apache-2.0/MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/vorner/bytes-utils",
+   "table_only": true
+  },
+  {
+   "name": "crate cc",
+   "version": "1.2.63",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/cc-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate cfg-if",
+   "version": "1.0.4",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/cfg-if",
+   "table_only": true
+  },
+  {
+   "name": "crate cfg_aliases",
+   "version": "0.2.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/katharostech/cfg_aliases",
+   "table_only": true
+  },
+  {
+   "name": "crate chacha20",
+   "version": "0.10.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/stream-ciphers",
+   "table_only": true
+  },
+  {
+   "name": "crate chrono",
+   "version": "0.4.44",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/chronotope/chrono",
+   "table_only": true
+  },
+  {
+   "name": "crate cmake",
+   "version": "0.1.58",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/cmake-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate cmov",
+   "version": "0.5.4",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/utils",
+   "table_only": true
+  },
+  {
+   "name": "crate const-oid",
+   "version": "0.10.2",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/formats",
+   "table_only": true
+  },
+  {
+   "name": "crate core-foundation",
+   "version": "0.10.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/core-foundation-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate core-foundation-sys",
+   "version": "0.8.7",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/core-foundation-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate core_maths",
+   "version": "0.1.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/robertbastian/core_maths",
+   "table_only": true
+  },
+  {
+   "name": "crate cpufeatures",
+   "version": "0.2.17",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/utils",
+   "table_only": true
+  },
+  {
+   "name": "crate cpufeatures",
+   "version": "0.3.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/utils",
+   "table_only": true
+  },
+  {
+   "name": "crate crossbeam-deque",
+   "version": "0.8.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/crossbeam-rs/crossbeam",
+   "table_only": true
+  },
+  {
+   "name": "crate crossbeam-epoch",
+   "version": "0.9.18",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/crossbeam-rs/crossbeam",
+   "table_only": true
+  },
+  {
+   "name": "crate crossbeam-utils",
+   "version": "0.8.21",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/crossbeam-rs/crossbeam",
+   "table_only": true
+  },
+  {
+   "name": "crate crypto-common",
+   "version": "0.1.7",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/traits",
+   "table_only": true
+  },
+  {
+   "name": "crate crypto-common",
+   "version": "0.2.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/traits",
+   "table_only": true
+  },
+  {
+   "name": "crate csv",
+   "version": "1.4.0",
+   "license": "Unlicense/MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/BurntSushi/rust-csv",
+   "table_only": true
+  },
+  {
+   "name": "crate csv-core",
+   "version": "0.1.13",
+   "license": "Unlicense/MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/BurntSushi/rust-csv",
+   "table_only": true
+  },
+  {
+   "name": "crate ctutils",
+   "version": "0.4.2",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/utils",
+   "table_only": true
+  },
+  {
+   "name": "crate cuckoofilter",
+   "version": "0.5.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/axiomhq/rust-cuckoofilter",
+   "table_only": true
+  },
+  {
+   "name": "crate dashmap",
+   "version": "6.2.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/xacrimon/dashmap",
+   "table_only": true
+  },
+  {
+   "name": "crate debug_panic",
+   "version": "0.2.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/kellytk/debug_panic",
+   "table_only": true
+  },
+  {
+   "name": "crate deranged",
+   "version": "0.5.8",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/jhpratt/deranged",
+   "table_only": true
+  },
+  {
+   "name": "crate derive_utils",
+   "version": "0.15.1",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/taiki-e/derive_utils",
+   "table_only": true
+  },
+  {
+   "name": "crate digest",
+   "version": "0.10.7",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/traits",
+   "table_only": true
+  },
+  {
+   "name": "crate digest",
+   "version": "0.11.3",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/traits",
+   "table_only": true
+  },
+  {
+   "name": "crate displaydoc",
+   "version": "0.2.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/yaahc/displaydoc",
+   "table_only": true
+  },
+  {
+   "name": "crate dunce",
+   "version": "1.0.5",
+   "license": "CC0-1.0 OR MIT-0 OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://gitlab.com/kornelski/dunce",
+   "table_only": true
+  },
+  {
+   "name": "crate duration-str",
+   "version": "0.20.0",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/baoyachi/duration-str",
+   "table_only": true
+  },
+  {
+   "name": "crate either",
+   "version": "1.16.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rayon-rs/either",
+   "table_only": true
+  },
+  {
+   "name": "crate equivalent",
+   "version": "1.0.2",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/indexmap-rs/equivalent",
+   "table_only": true
+  },
+  {
+   "name": "crate errno",
+   "version": "0.3.14",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/lambda-fairy/rust-errno",
+   "table_only": true
+  },
+  {
+   "name": "crate fancy-regex",
+   "version": "0.13.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/fancy-regex/fancy-regex",
+   "table_only": true
+  },
+  {
+   "name": "crate fastbloom-rs",
+   "version": "0.5.10",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/yankun1992/fastbloom",
+   "table_only": true
+  },
+  {
+   "name": "crate fastmurmur3",
+   "version": "0.2.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/kurtbuilds/fastmurmur3",
+   "table_only": true
+  },
+  {
+   "name": "crate fastrand",
+   "version": "2.4.1",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/smol-rs/fastrand",
+   "table_only": true
+  },
+  {
+   "name": "crate find-msvc-tools",
+   "version": "0.1.9",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/cc-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate fixedbitset",
+   "version": "0.5.7",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/petgraph/fixedbitset",
+   "table_only": true
+  },
+  {
+   "name": "crate fnv",
+   "version": "1.0.7",
+   "license": "Apache-2.0 / MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/rust-fnv",
+   "table_only": true
+  },
+  {
+   "name": "crate foldhash",
+   "version": "0.1.5",
+   "license": "Zlib",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/orlp/foldhash",
+   "table_only": true
+  },
+  {
+   "name": "crate form_urlencoded",
+   "version": "1.2.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/rust-url",
+   "table_only": true
+  },
+  {
+   "name": "crate fs_extra",
+   "version": "1.3.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/webdesus/fs_extra",
+   "table_only": true
+  },
+  {
+   "name": "crate fst",
+   "version": "0.4.7",
+   "license": "Unlicense/MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/BurntSushi/fst",
+   "table_only": true
+  },
+  {
+   "name": "crate futures",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate futures-channel",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate futures-core",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate futures-executor",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate futures-io",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate futures-macro",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate futures-sink",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate futures-task",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate futures-util",
+   "version": "0.3.32",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/futures-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate generic-array",
+   "version": "0.14.7",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/fizyk20/generic-array.git",
+   "table_only": true
+  },
+  {
+   "name": "crate getrandom",
+   "version": "0.1.16",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/getrandom",
+   "table_only": true
+  },
+  {
+   "name": "crate getrandom",
+   "version": "0.2.17",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/getrandom",
+   "table_only": true
+  },
+  {
+   "name": "crate getrandom",
+   "version": "0.3.4",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/getrandom",
+   "table_only": true
+  },
+  {
+   "name": "crate getrandom",
+   "version": "0.4.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/getrandom",
+   "table_only": true
+  },
+  {
+   "name": "crate h2",
+   "version": "0.3.27",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/h2",
+   "table_only": true
+  },
+  {
+   "name": "crate h2",
+   "version": "0.4.14",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/h2",
+   "table_only": true
+  },
+  {
+   "name": "crate hashbrown",
+   "version": "0.14.5",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/hashbrown",
+   "table_only": true
+  },
+  {
+   "name": "crate hashbrown",
+   "version": "0.15.5",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/hashbrown",
+   "table_only": true
+  },
+  {
+   "name": "crate hashbrown",
+   "version": "0.17.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/hashbrown",
+   "table_only": true
+  },
+  {
+   "name": "crate heck",
+   "version": "0.5.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/withoutboats/heck",
+   "table_only": true
+  },
+  {
+   "name": "crate hex",
+   "version": "0.4.3",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/KokaKiwi/rust-hex",
+   "table_only": true
+  },
+  {
+   "name": "crate hmac",
+   "version": "0.13.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/MACs",
+   "table_only": true
+  },
+  {
+   "name": "crate http",
+   "version": "0.2.12",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/http",
+   "table_only": true
+  },
+  {
+   "name": "crate http",
+   "version": "1.4.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/http",
+   "table_only": true
+  },
+  {
+   "name": "crate http-body",
+   "version": "0.4.6",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/http-body",
+   "table_only": true
+  },
+  {
+   "name": "crate http-body",
+   "version": "1.0.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/http-body",
+   "table_only": true
+  },
+  {
+   "name": "crate http-body-util",
+   "version": "0.1.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/http-body",
+   "table_only": true
+  },
+  {
+   "name": "crate httparse",
+   "version": "1.10.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/seanmonstar/httparse",
+   "table_only": true
+  },
+  {
+   "name": "crate httpdate",
+   "version": "1.0.3",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/pyfisch/httpdate",
+   "table_only": true
+  },
+  {
+   "name": "crate hybrid-array",
+   "version": "0.4.12",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/hybrid-array",
+   "table_only": true
+  },
+  {
+   "name": "crate hyper",
+   "version": "0.14.32",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/hyper",
+   "table_only": true
+  },
+  {
+   "name": "crate hyper",
+   "version": "1.10.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/hyper",
+   "table_only": true
+  },
+  {
+   "name": "crate hyper-rustls",
+   "version": "0.24.2",
+   "license": "Apache-2.0 OR ISC OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/hyper-rustls",
+   "table_only": true
+  },
+  {
+   "name": "crate hyper-rustls",
+   "version": "0.27.9",
+   "license": "Apache-2.0 OR ISC OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/hyper-rustls",
+   "table_only": true
+  },
+  {
+   "name": "crate hyper-util",
+   "version": "0.1.20",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hyperium/hyper-util",
+   "table_only": true
+  },
+  {
+   "name": "crate iana-time-zone",
+   "version": "0.1.65",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/strawlab/iana-time-zone",
+   "table_only": true
+  },
+  {
+   "name": "crate iana-time-zone-haiku",
+   "version": "0.1.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/strawlab/iana-time-zone",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_collections",
+   "version": "1.5.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_collections",
+   "version": "2.2.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_locale_core",
+   "version": "2.2.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_locid",
+   "version": "1.5.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_normalizer",
+   "version": "2.2.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_normalizer_data",
+   "version": "2.2.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_properties",
+   "version": "2.2.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_properties_data",
+   "version": "2.2.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_provider",
+   "version": "1.5.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_provider",
+   "version": "2.2.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_provider_macros",
+   "version": "1.5.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_segmenter",
+   "version": "1.5.0",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate icu_segmenter_data",
+   "version": "1.5.1",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate id-arena",
+   "version": "2.3.0",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/fitzgen/id-arena",
+   "table_only": true
+  },
+  {
+   "name": "crate idna",
+   "version": "1.1.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/rust-url/",
+   "table_only": true
+  },
+  {
+   "name": "crate idna_adapter",
+   "version": "1.2.2",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hsivonen/idna_adapter",
+   "table_only": true
+  },
+  {
+   "name": "crate indexmap",
+   "version": "2.14.0",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/indexmap-rs/indexmap",
+   "table_only": true
+  },
+  {
+   "name": "crate ipnet",
+   "version": "2.12.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/krisprice/ipnet",
+   "table_only": true
+  },
+  {
+   "name": "crate itertools",
+   "version": "0.14.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-itertools/itertools",
+   "table_only": true
+  },
+  {
+   "name": "crate itoa",
+   "version": "1.0.18",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/itoa",
+   "table_only": true
+  },
+  {
+   "name": "crate jobserver",
+   "version": "0.1.34",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/jobserver-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate js-sys",
+   "version": "0.3.99",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys",
+   "table_only": true
+  },
+  {
+   "name": "crate lazy_static",
+   "version": "1.5.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang-nursery/lazy-static.rs",
+   "table_only": true
+  },
+  {
+   "name": "crate leb128fmt",
+   "version": "0.1.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bluk/leb128fmt",
+   "table_only": true
+  },
+  {
+   "name": "crate libc",
+   "version": "0.2.186",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/libc",
+   "table_only": true
+  },
+  {
+   "name": "crate libm",
+   "version": "0.2.16",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/compiler-builtins",
+   "table_only": true
+  },
+  {
+   "name": "crate linux-raw-sys",
+   "version": "0.12.1",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/sunfishcode/linux-raw-sys",
+   "table_only": true
+  },
+  {
+   "name": "crate litemap",
+   "version": "0.7.5",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate litemap",
+   "version": "0.8.2",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate lock_api",
+   "version": "0.4.14",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Amanieu/parking_lot",
+   "table_only": true
+  },
+  {
+   "name": "crate log",
+   "version": "0.4.30",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/log",
+   "table_only": true
+  },
+  {
+   "name": "crate memchr",
+   "version": "2.8.1",
+   "license": "Unlicense OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/BurntSushi/memchr",
+   "table_only": true
+  },
+  {
+   "name": "crate memmap",
+   "version": "0.7.0",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/danburkert/memmap-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate memmap2",
+   "version": "0.9.10",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RazrFalcon/memmap2-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate mio",
+   "version": "1.2.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/mio",
+   "table_only": true
+  },
+  {
+   "name": "crate nix",
+   "version": "0.29.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/nix-rust/nix",
+   "table_only": true
+  },
+  {
+   "name": "crate num",
+   "version": "0.4.3",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-num/num",
+   "table_only": true
+  },
+  {
+   "name": "crate num-bigint",
+   "version": "0.4.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-num/num-bigint",
+   "table_only": true
+  },
+  {
+   "name": "crate num-complex",
+   "version": "0.4.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-num/num-complex",
+   "table_only": true
+  },
+  {
+   "name": "crate num-conv",
+   "version": "0.2.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/jhpratt/num-conv",
+   "table_only": true
+  },
+  {
+   "name": "crate num-integer",
+   "version": "0.1.46",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-num/num-integer",
+   "table_only": true
+  },
+  {
+   "name": "crate num-iter",
+   "version": "0.1.45",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-num/num-iter",
+   "table_only": true
+  },
+  {
+   "name": "crate num-rational",
+   "version": "0.4.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-num/num-rational",
+   "table_only": true
+  },
+  {
+   "name": "crate num-traits",
+   "version": "0.2.19",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-num/num-traits",
+   "table_only": true
+  },
+  {
+   "name": "crate once_cell",
+   "version": "1.21.4",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/matklad/once_cell",
+   "table_only": true
+  },
+  {
+   "name": "crate openssl-probe",
+   "version": "0.2.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/openssl-probe",
+   "table_only": true
+  },
+  {
+   "name": "crate oramacore_fields",
+   "version": "0.2.0",
+   "license": "AGPL-3.0-or-later",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/oramasearch/oramacore_fields",
+   "table_only": true
+  },
+  {
+   "name": "crate oramacore_lib",
+   "version": "0.4.4",
+   "license": "AGPL-3.0 (from the crate's LICENSE.md; no license field)",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/oramasearch/oramacore_lib",
+   "table_only": true
+  },
+  {
+   "name": "crate oramacore_ptrie",
+   "version": "0.1.0",
+   "license": "MIT (from the crate's LICENSE; no license field)",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/vemonet/oramacore_ptrie.git",
+   "table_only": true
+  },
+  {
+   "name": "crate ordered-float",
+   "version": "4.6.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/reem/rust-ordered-float",
+   "table_only": true
+  },
+  {
+   "name": "crate outref",
+   "version": "0.5.2",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Nugine/outref",
+   "table_only": true
+  },
+  {
+   "name": "crate parking_lot",
+   "version": "0.12.5",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Amanieu/parking_lot",
+   "table_only": true
+  },
+  {
+   "name": "crate parking_lot_core",
+   "version": "0.9.12",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Amanieu/parking_lot",
+   "table_only": true
+  },
+  {
+   "name": "crate percent-encoding",
+   "version": "2.3.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/rust-url/",
+   "table_only": true
+  },
+  {
+   "name": "crate pin-project-lite",
+   "version": "0.2.17",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/taiki-e/pin-project-lite",
+   "table_only": true
+  },
+  {
+   "name": "crate pin-utils",
+   "version": "0.1.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang-nursery/pin-utils",
+   "table_only": true
+  },
+  {
+   "name": "crate potential_utf",
+   "version": "0.1.5",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate powerfmt",
+   "version": "0.2.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/jhpratt/powerfmt",
+   "table_only": true
+  },
+  {
+   "name": "crate ppv-lite86",
+   "version": "0.2.21",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/cryptocorrosion/cryptocorrosion",
+   "table_only": true
+  },
+  {
+   "name": "crate prettyplease",
+   "version": "0.2.37",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/prettyplease",
+   "table_only": true
+  },
+  {
+   "name": "crate proc-macro2",
+   "version": "1.0.106",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/proc-macro2",
+   "table_only": true
+  },
+  {
+   "name": "crate pulldown-cmark",
+   "version": "0.12.2",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/raphlinus/pulldown-cmark",
+   "table_only": true
+  },
+  {
+   "name": "crate pulp",
+   "version": "0.21.5",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/sarah-ek/pulp/",
+   "table_only": true
+  },
+  {
+   "name": "crate quote",
+   "version": "1.0.45",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/quote",
+   "table_only": true
+  },
+  {
+   "name": "crate r-efi",
+   "version": "5.3.0",
+   "license": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/r-efi/r-efi",
+   "table_only": true
+  },
+  {
+   "name": "crate r-efi",
+   "version": "6.0.0",
+   "license": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/r-efi/r-efi",
+   "table_only": true
+  },
+  {
+   "name": "crate rand",
+   "version": "0.10.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand",
+   "version": "0.7.3",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand",
+   "version": "0.8.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand",
+   "version": "0.9.4",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand_chacha",
+   "version": "0.2.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand_chacha",
+   "version": "0.3.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand_chacha",
+   "version": "0.9.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand_core",
+   "version": "0.10.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand_core",
+   "table_only": true
+  },
+  {
+   "name": "crate rand_core",
+   "version": "0.5.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand_core",
+   "version": "0.6.4",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand_core",
+   "version": "0.9.5",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rand_hc",
+   "version": "0.2.0",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-random/rand",
+   "table_only": true
+  },
+  {
+   "name": "crate rayon",
+   "version": "1.12.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rayon-rs/rayon",
+   "table_only": true
+  },
+  {
+   "name": "crate rayon-core",
+   "version": "1.13.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rayon-rs/rayon",
+   "table_only": true
+  },
+  {
+   "name": "crate reborrow",
+   "version": "0.5.5",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/sarah-ek/reborrow/",
+   "table_only": true
+  },
+  {
+   "name": "crate redact",
+   "version": "0.1.11",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/eopb/redact",
+   "table_only": true
+  },
+  {
+   "name": "crate redox_syscall",
+   "version": "0.5.18",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://gitlab.redox-os.org/redox-os/syscall",
+   "table_only": true
+  },
+  {
+   "name": "crate regex",
+   "version": "1.12.3",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/regex",
+   "table_only": true
+  },
+  {
+   "name": "crate regex-automata",
+   "version": "0.4.14",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/regex",
+   "table_only": true
+  },
+  {
+   "name": "crate regex-lite",
+   "version": "0.1.9",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/regex",
+   "table_only": true
+  },
+  {
+   "name": "crate regex-syntax",
+   "version": "0.8.10",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/regex",
+   "table_only": true
+  },
+  {
+   "name": "crate ring",
+   "version": "0.17.14",
+   "license": "Apache-2.0 AND ISC",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/briansmith/ring",
+   "table_only": true
+  },
+  {
+   "name": "crate rust-stemmers",
+   "version": "1.2.0",
+   "license": "MIT/BSD-3-Clause",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/CurrySoftware/rust-stemmers",
+   "table_only": true
+  },
+  {
+   "name": "crate rust_decimal",
+   "version": "1.42.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/paupino/rust-decimal",
+   "table_only": true
+  },
+  {
+   "name": "crate rustc-hash",
+   "version": "1.1.0",
+   "license": "Apache-2.0/MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang-nursery/rustc-hash",
+   "table_only": true
+  },
+  {
+   "name": "crate rustc_version",
+   "version": "0.4.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/djc/rustc-version-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate rustix",
+   "version": "1.1.4",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/rustix",
+   "table_only": true
+  },
+  {
+   "name": "crate rustls",
+   "version": "0.21.12",
+   "license": "Apache-2.0 OR ISC OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/rustls",
+   "table_only": true
+  },
+  {
+   "name": "crate rustls",
+   "version": "0.23.40",
+   "license": "Apache-2.0 OR ISC OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/rustls",
+   "table_only": true
+  },
+  {
+   "name": "crate rustls-native-certs",
+   "version": "0.8.3",
+   "license": "Apache-2.0 OR ISC OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/rustls-native-certs",
+   "table_only": true
+  },
+  {
+   "name": "crate rustls-pki-types",
+   "version": "1.14.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/pki-types",
+   "table_only": true
+  },
+  {
+   "name": "crate rustls-webpki",
+   "version": "0.101.7",
+   "license": "ISC",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/webpki",
+   "table_only": true
+  },
+  {
+   "name": "crate rustls-webpki",
+   "version": "0.103.13",
+   "license": "ISC",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/webpki",
+   "table_only": true
+  },
+  {
+   "name": "crate rustversion",
+   "version": "1.0.22",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/rustversion",
+   "table_only": true
+  },
+  {
+   "name": "crate ryu",
+   "version": "1.0.23",
+   "license": "Apache-2.0 OR BSL-1.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/ryu",
+   "table_only": true
+  },
+  {
+   "name": "crate schannel",
+   "version": "0.1.29",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/steffengy/schannel-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate scopeguard",
+   "version": "1.2.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bluss/scopeguard",
+   "table_only": true
+  },
+  {
+   "name": "crate sct",
+   "version": "0.7.1",
+   "license": "Apache-2.0 OR ISC OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/sct.rs",
+   "table_only": true
+  },
+  {
+   "name": "crate security-framework",
+   "version": "3.7.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/kornelski/rust-security-framework",
+   "table_only": true
+  },
+  {
+   "name": "crate security-framework-sys",
+   "version": "2.17.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/kornelski/rust-security-framework",
+   "table_only": true
+  },
+  {
+   "name": "crate semver",
+   "version": "1.0.28",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/semver",
+   "table_only": true
+  },
+  {
+   "name": "crate serde",
+   "version": "1.0.228",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/serde-rs/serde",
+   "table_only": true
+  },
+  {
+   "name": "crate serde-big-array",
+   "version": "0.5.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/est31/serde-big-array",
+   "table_only": true
+  },
+  {
+   "name": "crate serde_core",
+   "version": "1.0.228",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/serde-rs/serde",
+   "table_only": true
+  },
+  {
+   "name": "crate serde_derive",
+   "version": "1.0.228",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/serde-rs/serde",
+   "table_only": true
+  },
+  {
+   "name": "crate serde_json",
+   "version": "1.0.150",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/serde-rs/json",
+   "table_only": true
+  },
+  {
+   "name": "crate sha1",
+   "version": "0.10.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/hashes",
+   "table_only": true
+  },
+  {
+   "name": "crate sha2",
+   "version": "0.11.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/hashes",
+   "table_only": true
+  },
+  {
+   "name": "crate shlex",
+   "version": "2.0.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/comex/rust-shlex",
+   "table_only": true
+  },
+  {
+   "name": "crate signal-hook-registry",
+   "version": "1.4.8",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/vorner/signal-hook",
+   "table_only": true
+  },
+  {
+   "name": "crate slab",
+   "version": "0.4.12",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/slab",
+   "table_only": true
+  },
+  {
+   "name": "crate smallvec",
+   "version": "1.15.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/rust-smallvec",
+   "table_only": true
+  },
+  {
+   "name": "crate socket2",
+   "version": "0.5.10",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/socket2",
+   "table_only": true
+  },
+  {
+   "name": "crate socket2",
+   "version": "0.6.4",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rust-lang/socket2",
+   "table_only": true
+  },
+  {
+   "name": "crate stable_deref_trait",
+   "version": "1.2.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/storyyeller/stable_deref_trait",
+   "table_only": true
+  },
+  {
+   "name": "crate streaming-iterator",
+   "version": "0.1.9",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/sfackler/streaming-iterator",
+   "table_only": true
+  },
+  {
+   "name": "crate strum",
+   "version": "0.26.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Peternator7/strum",
+   "table_only": true
+  },
+  {
+   "name": "crate strum_macros",
+   "version": "0.26.4",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Peternator7/strum",
+   "table_only": true
+  },
+  {
+   "name": "crate subtle",
+   "version": "2.6.1",
+   "license": "BSD-3-Clause",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dalek-cryptography/subtle",
+   "table_only": true
+  },
+  {
+   "name": "crate syn",
+   "version": "2.0.117",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/syn",
+   "table_only": true
+  },
+  {
+   "name": "crate synstructure",
+   "version": "0.13.2",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/mystor/synstructure",
+   "table_only": true
+  },
+  {
+   "name": "crate tempfile",
+   "version": "3.27.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Stebalien/tempfile",
+   "table_only": true
+  },
+  {
+   "name": "crate text-splitter",
+   "version": "0.22.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/benbrandt/text-splitter",
+   "table_only": true
+  },
+  {
+   "name": "crate thiserror",
+   "version": "2.0.18",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/thiserror",
+   "table_only": true
+  },
+  {
+   "name": "crate thiserror-impl",
+   "version": "2.0.18",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/thiserror",
+   "table_only": true
+  },
+  {
+   "name": "crate tiktoken-rs",
+   "version": "0.6.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/zurawiki/tiktoken-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate time",
+   "version": "0.3.47",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/time-rs/time",
+   "table_only": true
+  },
+  {
+   "name": "crate time-core",
+   "version": "0.1.8",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/time-rs/time",
+   "table_only": true
+  },
+  {
+   "name": "crate time-macros",
+   "version": "0.2.27",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/time-rs/time",
+   "table_only": true
+  },
+  {
+   "name": "crate tinystr",
+   "version": "0.7.6",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate tinystr",
+   "version": "0.8.3",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate tokio",
+   "version": "1.52.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/tokio",
+   "table_only": true
+  },
+  {
+   "name": "crate tokio-macros",
+   "version": "2.7.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/tokio",
+   "table_only": true
+  },
+  {
+   "name": "crate tokio-rustls",
+   "version": "0.24.1",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/tokio-rustls",
+   "table_only": true
+  },
+  {
+   "name": "crate tokio-rustls",
+   "version": "0.26.4",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/rustls/tokio-rustls",
+   "table_only": true
+  },
+  {
+   "name": "crate tokio-util",
+   "version": "0.7.18",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/tokio",
+   "table_only": true
+  },
+  {
+   "name": "crate tower",
+   "version": "0.5.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tower-rs/tower",
+   "table_only": true
+  },
+  {
+   "name": "crate tower-layer",
+   "version": "0.3.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tower-rs/tower",
+   "table_only": true
+  },
+  {
+   "name": "crate tower-service",
+   "version": "0.3.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tower-rs/tower",
+   "table_only": true
+  },
+  {
+   "name": "crate tracing",
+   "version": "0.1.44",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/tracing",
+   "table_only": true
+  },
+  {
+   "name": "crate tracing-attributes",
+   "version": "0.1.31",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/tracing",
+   "table_only": true
+  },
+  {
+   "name": "crate tracing-core",
+   "version": "0.1.36",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tokio-rs/tracing",
+   "table_only": true
+  },
+  {
+   "name": "crate tree-sitter",
+   "version": "0.24.7",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tree-sitter/tree-sitter",
+   "table_only": true
+  },
+  {
+   "name": "crate tree-sitter-language",
+   "version": "0.1.7",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/tree-sitter/tree-sitter",
+   "table_only": true
+  },
+  {
+   "name": "crate try-lock",
+   "version": "0.2.5",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/seanmonstar/try-lock",
+   "table_only": true
+  },
+  {
+   "name": "crate typenum",
+   "version": "1.20.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/paholg/typenum",
+   "table_only": true
+  },
+  {
+   "name": "crate unicase",
+   "version": "2.9.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/seanmonstar/unicase",
+   "table_only": true
+  },
+  {
+   "name": "crate unicode-ident",
+   "version": "1.0.24",
+   "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/unicode-ident",
+   "table_only": true
+  },
+  {
+   "name": "crate unicode-xid",
+   "version": "0.2.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-rs/unicode-xid",
+   "table_only": true
+  },
+  {
+   "name": "crate untrusted",
+   "version": "0.9.0",
+   "license": "ISC",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/briansmith/untrusted",
+   "table_only": true
+  },
+  {
+   "name": "crate url",
+   "version": "2.5.8",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/servo/rust-url",
+   "table_only": true
+  },
+  {
+   "name": "crate urlencoding",
+   "version": "2.1.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/kornelski/rust_urlencoding",
+   "table_only": true
+  },
+  {
+   "name": "crate utf8-ranges",
+   "version": "1.0.5",
+   "license": "Unlicense/MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/BurntSushi/utf8-ranges",
+   "table_only": true
+  },
+  {
+   "name": "crate utf8_iter",
+   "version": "1.0.4",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/hsivonen/utf8_iter",
+   "table_only": true
+  },
+  {
+   "name": "crate uuid",
+   "version": "1.23.2",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/uuid-rs/uuid",
+   "table_only": true
+  },
+  {
+   "name": "crate version_check",
+   "version": "0.9.5",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/SergioBenitez/version_check",
+   "table_only": true
+  },
+  {
+   "name": "crate vsimd",
+   "version": "0.8.0",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/Nugine/simd",
+   "table_only": true
+  },
+  {
+   "name": "crate want",
+   "version": "0.3.1",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/seanmonstar/want",
+   "table_only": true
+  },
+  {
+   "name": "crate wasi",
+   "version": "0.11.1+wasi-snapshot-preview1",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasi",
+   "table_only": true
+  },
+  {
+   "name": "crate wasi",
+   "version": "0.9.0+wasi-snapshot-preview1",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasi",
+   "table_only": true
+  },
+  {
+   "name": "crate wasip2",
+   "version": "1.0.3+wasi-0.2.9",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasi-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate wasip3",
+   "version": "0.4.0+wasi-0.3.0-rc-2026-01-06",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasi-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate wasm-bindgen",
+   "version": "0.2.122",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/wasm-bindgen/wasm-bindgen",
+   "table_only": true
+  },
+  {
+   "name": "crate wasm-bindgen-macro",
+   "version": "0.2.122",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro",
+   "table_only": true
+  },
+  {
+   "name": "crate wasm-bindgen-macro-support",
+   "version": "0.2.122",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro-support",
+   "table_only": true
+  },
+  {
+   "name": "crate wasm-bindgen-shared",
+   "version": "0.2.122",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared",
+   "table_only": true
+  },
+  {
+   "name": "crate wasm-encoder",
+   "version": "0.244.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasm-encoder",
+   "table_only": true
+  },
+  {
+   "name": "crate wasm-metadata",
+   "version": "0.244.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasm-metadata",
+   "table_only": true
+  },
+  {
+   "name": "crate wasmparser",
+   "version": "0.244.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasmparser",
+   "table_only": true
+  },
+  {
+   "name": "crate winapi",
+   "version": "0.3.9",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/retep998/winapi-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate winapi-i686-pc-windows-gnu",
+   "version": "0.4.0",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/retep998/winapi-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate winapi-x86_64-pc-windows-gnu",
+   "version": "0.4.0",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/retep998/winapi-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-core",
+   "version": "0.62.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-implement",
+   "version": "0.60.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-interface",
+   "version": "0.59.3",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-link",
+   "version": "0.2.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-result",
+   "version": "0.4.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-strings",
+   "version": "0.5.1",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-sys",
+   "version": "0.52.0",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-sys",
+   "version": "0.61.2",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows-targets",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows_aarch64_gnullvm",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows_aarch64_msvc",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows_i686_gnu",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows_i686_gnullvm",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows_i686_msvc",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows_x86_64_gnu",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows_x86_64_gnullvm",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate windows_x86_64_msvc",
+   "version": "0.52.6",
+   "license": "MIT OR Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/microsoft/windows-rs",
+   "table_only": true
+  },
+  {
+   "name": "crate winnow",
+   "version": "0.7.15",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/winnow-rs/winnow",
+   "table_only": true
+  },
+  {
+   "name": "crate wit-bindgen",
+   "version": "0.51.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wit-bindgen",
+   "table_only": true
+  },
+  {
+   "name": "crate wit-bindgen",
+   "version": "0.57.1",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wit-bindgen",
+   "table_only": true
+  },
+  {
+   "name": "crate wit-bindgen-core",
+   "version": "0.51.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wit-bindgen",
+   "table_only": true
+  },
+  {
+   "name": "crate wit-bindgen-rust",
+   "version": "0.51.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wit-bindgen",
+   "table_only": true
+  },
+  {
+   "name": "crate wit-bindgen-rust-macro",
+   "version": "0.51.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wit-bindgen",
+   "table_only": true
+  },
+  {
+   "name": "crate wit-component",
+   "version": "0.244.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wit-component",
+   "table_only": true
+  },
+  {
+   "name": "crate wit-parser",
+   "version": "0.244.0",
+   "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wit-parser",
+   "table_only": true
+  },
+  {
+   "name": "crate writeable",
+   "version": "0.5.5",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate writeable",
+   "version": "0.6.3",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate xmlparser",
+   "version": "0.13.6",
+   "license": "MIT/Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RazrFalcon/xmlparser",
+   "table_only": true
+  },
+  {
+   "name": "crate xorfilter-rs",
+   "version": "0.5.1",
+   "license": "Apache-2.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/bnclabs/xorfilter",
+   "table_only": true
+  },
+  {
+   "name": "crate xtri",
+   "version": "0.1.3",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/oramasearch/xtri",
+   "table_only": true
+  },
+  {
+   "name": "crate xxhash-rust",
+   "version": "0.8.15",
+   "license": "BSL-1.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/DoumanAsh/xxhash-rust",
+   "table_only": true
+  },
+  {
+   "name": "crate yoke",
+   "version": "0.7.5",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate yoke",
+   "version": "0.8.2",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate yoke-derive",
+   "version": "0.7.5",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate yoke-derive",
+   "version": "0.8.2",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate zerocopy",
+   "version": "0.8.50",
+   "license": "BSD-2-Clause OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/google/zerocopy",
+   "table_only": true
+  },
+  {
+   "name": "crate zerocopy-derive",
+   "version": "0.8.50",
+   "license": "BSD-2-Clause OR Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/google/zerocopy",
+   "table_only": true
+  },
+  {
+   "name": "crate zerofrom",
+   "version": "0.1.8",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate zerofrom-derive",
+   "version": "0.1.7",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate zeroize",
+   "version": "1.8.2",
+   "license": "Apache-2.0 OR MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/RustCrypto/utils",
+   "table_only": true
+  },
+  {
+   "name": "crate zerotrie",
+   "version": "0.2.4",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate zerovec",
+   "version": "0.10.4",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate zerovec",
+   "version": "0.11.6",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate zerovec-derive",
+   "version": "0.10.3",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate zerovec-derive",
+   "version": "0.11.3",
+   "license": "Unicode-3.0",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/unicode-org/icu4x",
+   "table_only": true
+  },
+  {
+   "name": "crate zmij",
+   "version": "1.0.21",
+   "license": "MIT",
+   "use": "benchmark only (bench/rust-comparison), not part of the library",
+   "source": "https://github.com/dtolnay/zmij",
+   "table_only": true
+  }
+ ]
+}

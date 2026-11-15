@@ -1,10 +1,12 @@
-cmake_minimum_required(VERSION 3.28)
-project(oramacore-cpp LANGUAGES CXX)
+# SPDX-License-Identifier: MIT
 
-# Orama Platform — oramacore-cpp: the C++23 port of OramaCore's engine.
+cmake_minimum_required(VERSION 3.28)
+project(oramacore-cpp VERSION 0.1.0 LANGUAGES CXX)
+
+# oramacore-cpp: a C++23 rewrite of the OramaCore search engine.
 # First index type: BM25F full-text (see docs/bm25f-port-notes.md).
-# Library-first (D16); C++23 today, C++26 target (D7); coroutines via Boost.Capy
-# (D23) — async index/search ops are co_await-shaped. Lives under the data node.
+# A library; C++23 today, C++26 as the target; coroutines via Boost.Capy, so
+# async index and search operations are co_await-shaped.
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -13,12 +15,12 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Capy (the coroutine I/O foundation, D23) is added via FetchContent behind this
+# Capy (the coroutine I/O foundation) is added via FetchContent behind this
 # option once we wire async search/index. The scaffold is Capy-free so it builds
 # anywhere; the public API is designed to be coroutine-shaped (task<T>-returning).
-option(ORAMACORE_CPP_CAPY "Build against Boost.Capy coroutine runtime (D23)" OFF)
+option(ORAMACORE_CPP_CAPY "Build against Boost.Capy coroutine runtime" OFF)
 
-# Library-first (D16). The BM25F scoring core is compiled; later subsystems
+# A library. The BM25F scoring core is compiled; later subsystems
 # (tokenization, posting lists, committed index, async search) join here.
 add_library(oramacore-cpp STATIC
   src/bm25f.cpp
@@ -45,6 +47,10 @@ if(BUILD_TESTING)
   FetchContent_MakeAvailable(Catch2)
   add_executable(oramacore-cpp-tests tests/test_main.cpp tests/test_bm25f.cpp tests/test_tokenize.cpp tests/test_index.cpp)
   target_link_libraries(oramacore-cpp-tests PRIVATE oramacore-cpp Catch2::Catch2WithMain)
+  # The version in the code is the project's, and it has release notes.
+  target_compile_definitions(oramacore-cpp-tests PRIVATE ORAMACORE_CPP_PROJECT_VERSION="${PROJECT_VERSION}")
+  add_test(NAME release-notes-exist
+           COMMAND ${CMAKE_COMMAND} -E cat ${CMAKE_CURRENT_SOURCE_DIR}/docs/releases/v${PROJECT_VERSION}.md)
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
   include(Catch)
   catch_discover_tests(oramacore-cpp-tests)

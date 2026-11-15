@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 //! Standalone microbenchmark of OramaCore's real on-disk BM25 string index
 //! (`oramacore_fields::string`) with the real `oramacore_lib` EN tokenizer/stemmer.
 //!
@@ -329,10 +331,13 @@ fn run_dataset(label: &str, path: &str, n_queries: usize, warmup: usize) {
 }
 
 fn main() {
-    let base_10k = "/Users/stevesperandeo/Downloads/customers-10000.csv";
-    let base_2m = "/Users/stevesperandeo/Downloads/customers-2000000.csv";
+    // The Datablist sample CSVs (see bench/README.md). Their folder comes from
+    // BENCH_DATA_DIR, or the current directory when it is not set.
+    let data_dir = std::env::var("BENCH_DATA_DIR").unwrap_or_else(|_| ".".to_string());
+    let base_10k = format!("{data_dir}/customers-10000.csv");
+    let base_2m = format!("{data_dir}/customers-2000000.csv");
 
     // protocol: 30000 queries each, 1000 warmup
-    run_dataset("10k", base_10k, 30_000, 1_000);
-    run_dataset("2M", base_2m, 30_000, 1_000);
+    run_dataset("10k", &base_10k, 30_000, 1_000);
+    run_dataset("2M", &base_2m, 30_000, 1_000);
 }
