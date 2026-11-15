@@ -70,14 +70,13 @@ struct CorpusStats {
     bool operator==(const CorpusStats&) const = default;
 };
 
-// Bounds on the fields an index registers (oramacore-cpp#4). Field names come
-// from the documents, so their number and length are input: without a bound,
-// one document with a million keys, or a million documents with one new key
-// each, makes every later add(), stats() and sharded search() pay for them.
+// Bounds on the fields an index registers. Field names come from the documents,
+// so their number and length are input. add() costs O(the document's fields), so
+// the bounds are generous; they stop a single document from being unbounded.
 struct Limits {
-    std::size_t max_fields = 1024;               // registered fields, declared + auto
-    std::size_t max_fields_per_document = 512;   // fields one document may carry
-    std::size_t max_field_name_length = 256;     // bytes in an auto-registered name
+    std::size_t max_fields = 1'000'000;              // registered fields, declared + auto
+    std::size_t max_fields_per_document = 1'000'000; // fields one document may carry
+    std::size_t max_field_name_length = 1024;        // bytes in an auto-registered name
 };
 
 // Minimal in-memory BM25F index.

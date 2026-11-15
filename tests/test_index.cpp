@@ -276,13 +276,15 @@ TEST_CASE("a field name longer than the limit is refused", "[index][limits]") {
     REQUIRE(idx.field_count() == 1);
 }
 
-TEST_CASE("the default limits refuse a document with a million keys", "[index][limits]") {
+TEST_CASE("the default limits allow a million fields and 1 KiB names", "[index][limits]") {
     ix::MemoryIndex idx({});
-    ix::Document huge;
-    for (int i = 0; i < 1'000'000; ++i) huge["k" + std::to_string(i)] = "v";
-    REQUIRE_FALSE(idx.add(huge).has_value());
-    REQUIRE(idx.field_count() == 0);
-    REQUIRE(idx.limits().max_fields == 1024);
+    REQUIRE(idx.limits().max_fields == 1'000'000);
+    REQUIRE(idx.limits().max_fields_per_document == 1'000'000);
+    REQUIRE(idx.limits().max_field_name_length == 1024);
+
+    REQUIRE(idx.add({{std::string(1024, 'n'), "v"}}).has_value());
+    REQUIRE_FALSE(idx.add({{std::string(1025, 'n'), "v"}}).has_value());
+    REQUIRE(idx.field_count() == 1);
 }
 
 TEST_CASE("per-field scores stay right when a document touches only some fields",

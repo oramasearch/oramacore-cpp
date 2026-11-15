@@ -50,9 +50,9 @@ auto-registered. Their number and length are therefore input, and `MemoryIndex` 
 
 | Limit | Default | Refused when |
 |---|---|---|
-| `max_fields` | 1024 | the document's new fields would take the registered fields (declared + auto) past it |
-| `max_fields_per_document` | 512 | the document carries more fields than this |
-| `max_field_name_length` | 256 bytes | a new field's name is longer |
+| `max_fields` | 1,000,000 | the document's new fields would take the registered fields (declared + auto) past it |
+| `max_fields_per_document` | 1,000,000 | the document carries more fields than this |
+| `max_field_name_length` | 1024 bytes | a new field's name is longer |
 
 `add()` returns `Result<DocId>`: a refused document gets an `Error` saying which limit it broke, and
 the index is unchanged (the checks run before anything is written).
