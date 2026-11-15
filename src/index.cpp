@@ -2,20 +2,49 @@
 
 #include <algorithm>
 #include <set>
+#include <string>
 
 namespace oramacore::index {
 
 MemoryIndex::MemoryIndex(std::vector<FieldConfig> fields,
                          bm25f::Params global,
-                         tokenize::Options tok)
-    : fields_(std::move(fields)), global_(global), tok_(tok) {
+                         tokenize::Options tok,
+                         Limits limits)
+    : fields_(std::move(fields)), global_(global), tok_(tok), limits_(limits) {
     for (std::uint32_t i = 0; i < fields_.size(); ++i) {
         field_id_[fields_[i].name] = i;
     }
+    rebuild_field_caches();
 }
 
-DocId MemoryIndex::add(const Document& doc) {
+Result<DocId> MemoryIndex::add(const Document& doc) {
+    // Check the document against the limits before changing anything, so a
+    // refused document leaves the index exactly as it was (oramacore-cpp#4).
+    if (doc.size() > limits_.max_fields_per_document) {
+        return fail("document carries " + std::to_string(doc.size()) +
+                    " fields, more than the limit of " +
+                    std::to_string(limits_.max_fields_per_document));
+    }
+    std::size_t new_fields = 0;
+    for (const auto& [name, text] : doc) {
+        if (field_id_.contains(name)) continue;
+        if (name.size() > limits_.max_field_name_length) {
+            return fail("field name of " + std::to_string(name.size()) +
+                        " bytes is longer than the limit of " +
+                        std::to_string(limits_.max_field_name_length));
+        }
+        ++new_fields;
+    }
+    if (fields_.size() + new_fields > limits_.max_fields) {
+        return fail("document would register " + std::to_string(new_fields) +
+                    " new fields, taking the index past its limit of " +
+                    std::to_string(limits_.max_fields));
+    }
+
     const DocId id = static_cast<DocId>(doc_count_);
+    // The fields this document touched: only their scoring constants change.
+    std::vector<std::uint32_t> touched;
+    touched.reserve(doc.size());
     // Track, per document, which terms appeared at all (for doc-frequency).
     std::set<std::string> doc_terms;
 
@@ -31,6 +60,7 @@ DocId MemoryIndex::add(const Document& doc) {
             fields_.push_back(FieldConfig{.name = name, .params = {}});
             field_id_[name] = field_id;
         }
+        touched.push_back(field_id);
 
         const auto tokens = tokenize::tokenize(text, tok_);
         const std::uint32_t field_len = static_cast<std::uint32_t>(tokens.size());
@@ -52,7 +82,10 @@ DocId MemoryIndex::add(const Document& doc) {
 
     for (const auto& term : doc_terms) ++postings_[term].doc_freq;
     ++doc_count_;
-    rebuild_field_caches();  // keep flat scoring caches current (cheap, O(fields))
+    // Keep the flat scoring caches current for the fields this document touched:
+    // O(the document's fields), not O(every registered field) (oramacore-cpp#4).
+    fscore_.resize(fields_.size());
+    for (const std::uint32_t field_id : touched) update_field_cache(field_id);
     return id;
 }
 
@@ -68,17 +101,19 @@ MemoryIndex::FieldScore MemoryIndex::field_score(const FieldConfig& field,
     return fs;
 }
 
+void MemoryIndex::update_field_cache(std::uint32_t i) {
+    const auto tit = field_total_len_.find(i);
+    const auto cit = field_doc_count_.find(i);
+    double avg = 0.0;
+    if (tit != field_total_len_.end() && cit != field_doc_count_.end() && cit->second > 0) {
+        avg = static_cast<double>(tit->second) / static_cast<double>(cit->second);
+    }
+    fscore_[i] = field_score(fields_[i], avg);
+}
+
 void MemoryIndex::rebuild_field_caches() {
     fscore_.resize(fields_.size());
-    for (std::uint32_t i = 0; i < fields_.size(); ++i) {
-        const auto tit = field_total_len_.find(i);
-        const auto cit = field_doc_count_.find(i);
-        double avg = 0.0;
-        if (tit != field_total_len_.end() && cit != field_doc_count_.end() && cit->second > 0) {
-            avg = static_cast<double>(tit->second) / static_cast<double>(cit->second);
-        }
-        fscore_[i] = field_score(fields_[i], avg);
-    }
+    for (std::uint32_t i = 0; i < fields_.size(); ++i) update_field_cache(i);
 }
 
 void CorpusStats::merge(const CorpusStats& other) {
@@ -131,20 +166,37 @@ SearchResult MemoryIndex::search_impl(std::string_view query, std::size_t top_k,
     // global view (falling back to our own for anything it does not carry).
     const std::uint64_t total_docs =
         (global != nullptr && global->doc_count > 0) ? global->doc_count : doc_count_;
-    thread_local std::vector<FieldScore> global_fscore;  // reused per query
+    // With global statistics, a field's constants are computed the first time a
+    // posting of this query reaches it, never for every registered field: no copy
+    // of the whole cache per query (oramacore-cpp#4). `generation` marks which
+    // entries belong to this query; the buffers only grow and are reused.
+    thread_local std::vector<FieldScore> global_fscore;
+    thread_local std::vector<std::uint64_t> global_stamp;
+    thread_local std::uint64_t generation = 0;
     if (global != nullptr) {
-        global_fscore = fscore_;
-        for (std::uint32_t i = 0; i < fields_.size(); ++i) {
-            const auto fit = global->fields.find(fields_[i].name);
-            if (fit == global->fields.end()) continue;  // keep our own
-            const double avg = fit->second.doc_count > 0
-                ? static_cast<double>(fit->second.total_len) /
-                      static_cast<double>(fit->second.doc_count)
-                : 0.0;
-            global_fscore[i] = field_score(fields_[i], avg);
+        ++generation;
+        if (global_fscore.size() < fields_.size()) {
+            global_fscore.resize(fields_.size());
+            global_stamp.resize(fields_.size(), 0);
         }
     }
-    const std::vector<FieldScore>& fscore = (global != nullptr) ? global_fscore : fscore_;
+    const auto field_constants = [&](std::uint32_t field_id) -> const FieldScore& {
+        if (global == nullptr) return fscore_[field_id];
+        if (global_stamp[field_id] != generation) {
+            global_stamp[field_id] = generation;
+            const auto fit = global->fields.find(fields_[field_id].name);
+            if (fit == global->fields.end()) {
+                global_fscore[field_id] = fscore_[field_id];  // keep our own
+            } else {
+                const double avg = fit->second.doc_count > 0
+                    ? static_cast<double>(fit->second.total_len) /
+                          static_cast<double>(fit->second.doc_count)
+                    : 0.0;
+                global_fscore[field_id] = field_score(fields_[field_id], avg);
+            }
+        }
+        return global_fscore[field_id];
+    };
 
     // Search is read-only on the index (concurrency-safe); all scratch is
     // per-thread + reused, so there's no heap allocation per query after warmup.
@@ -204,7 +256,7 @@ SearchResult MemoryIndex::search_impl(std::string_view query, std::size_t top_k,
         double tf_tilde = 0.0;
         while (i < n && plist[i].doc_id == doc) {
             const Posting& p = plist[i];
-            const FieldScore& fs = fscore[p.field_id];
+            const FieldScore& fs = field_constants(p.field_id);
             const double denom = fs.c0 + fs.c1 * static_cast<double>(p.field_len);
             if (denom > 0.0) tf_tilde += fs.weight * (static_cast<double>(p.term_freq) / denom);
             ++i;
