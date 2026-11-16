@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:5f0b782c-1bbf-5741-bd5c-1e03b5613bdf",
+  "serialNumber": "urn:uuid:ce0dc94d-001b-5510-a34a-9b5157d1f934",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-16T01:31:12Z",
+    "timestamp": "2026-11-16T01:49:57Z",
     "tools": {
       "components": [
         {
@@ -6810,7 +6810,7 @@
       "bom-ref": "DocumentRoot",
       "type": "library",
       "name": "oramacore-cpp",
-      "version": "971454a1e311",
+      "version": "86071f7a9727",
       "licenses": [
         {
           "license": {
