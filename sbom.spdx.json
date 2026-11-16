@@ -2,17 +2,17 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "oramacore-cpp-v0.1.0",
-  "documentNamespace": "https://github.com/oramasearch/oramacore-cpp/sbom/bee2b5f204060d2c793683861ab2bd5c27ee031d",
+  "name": "oramacore-cpp-86071f7a9727",
+  "documentNamespace": "https://github.com/oramasearch/oramacore-cpp/sbom/86071f7a9727005c2f331798016b69a40df25b6b",
   "creationInfo": {
-    "created": "2026-11-15T23:10:09Z",
+    "created": "2026-11-16T01:49:57Z",
     "creators": [
       "Organization: OramaSearch, Inc.",
       "Tool: tools/sbom.py",
       "Tool: syft"
     ],
     "licenseListVersion": "3.29",
-    "comment": "Made from source commit bee2b5f204060d2c793683861ab2bd5c27ee031d by tools/sbom.py."
+    "comment": "Made from source commit 86071f7a9727005c2f331798016b69a40df25b6b by tools/sbom.py."
   },
   "documentDescribes": [
     "SPDXRef-DocumentRoot"
@@ -8763,7 +8763,7 @@
     {
       "name": "oramacore-cpp",
       "SPDXID": "SPDXRef-DocumentRoot",
-      "versionInfo": "v0.1.0",
+      "versionInfo": "86071f7a9727",
       "downloadLocation": "git+https://github.com/oramasearch/oramacore-cpp.git",
       "homepage": "https://github.com/oramasearch/oramacore-cpp",
       "filesAnalyzed": false,
